@@ -10,13 +10,13 @@ const userSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>, IUserMethod
     name: {
       type: String,
       required: true,
-      trim: true,
     },
     email: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
+      index:true
     },
     password: {
       type: String,

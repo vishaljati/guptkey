@@ -33,24 +33,22 @@ const generateAccessAndRefreshTokens = async (userId: Types.ObjectId) => {
 
 const registerUser = AsyncHandler(async (req: Request, res: Response) => {
     try {
-        const { username, email, password } = req.body
-        if (!username || !password) {
-            throw new ApiError(400, "Username and Password is required")
+        const { name, email, password } = req.body
+        if (!name || !email) {
+            throw new ApiError(400, "Name and Email is required")
         }
-        if (!email) {
-            throw new ApiError(400, "Email is required")
+        if (!password) {
+            throw new ApiError(400, "Password is required")
         }
 
-        const existedUser = await User.findOne({
-            $or: [{ username }, { email }]
-        })
+        const existedUser = await User.findOne({ email })
 
         if (existedUser) {
             throw new ApiError(409, "Username or Email already exists")
         }
 
         const newUser = await User.create({
-            username: username.toLowerCase(),
+            name,
             email,
             password
         })
@@ -148,7 +146,7 @@ const logoutUser = AsyncHandler(async (req: Request, res: Response) => {
 
 const refreshAccessToken = AsyncHandler(async (req: Request, res: Response) => {
 
-    const cookies = req.cookies || {}   // cookies not cookie
+    const cookies = req.cookies || {}   
     const body = req.body || {}
 
 
