@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 export interface AccessTokenPayload {
     _id: mongoose.Types.ObjectId;
-    username: string,
+    name: string,
     email: string,
     
 }

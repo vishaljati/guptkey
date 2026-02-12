@@ -2,7 +2,7 @@ import { AsyncHandler, ApiError } from "../utils/index.js";
 import { type Request, type Response, type NextFunction } from "express";
 import jwt, { type JwtPayload } from "jsonwebtoken";
 import { User } from "../models/user.models.js"
-import { type AccessTokenPayload } from "../types/jwt.types.js";
+import { type AccessTokenPayload, RefreshTokenPayload } from "../types/jwt.types.js";
 
 
 
@@ -25,16 +25,16 @@ export const verifyUser = AsyncHandler(async (
         decoded = jwt.verify(
             token,
             process.env.ACCESS_TOKEN_SECRET as string
-        );
+        ) as AccessTokenPayload;
 
     } catch (error) {
         throw new ApiError(401, "Invalid Access Token");
     }
 
-    if (typeof decoded === "string") {
+    if (!decoded) {
         throw new ApiError(401, "Invalid Access Token");
     }
-    const { _id } = decoded as AccessTokenPayload;
+    const { _id } = decoded;
     const user = await User.findById(_id).select(
         "-password -refreshToken"
     );
@@ -43,7 +43,7 @@ export const verifyUser = AsyncHandler(async (
         throw new ApiError(401, "Invalid Access Token");
     }
 
-    req.user=user
-    
+    req.user = user
+
     next();
 })
