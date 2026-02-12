@@ -5,13 +5,9 @@ import { type IUser, type IUserMethods } from "../types/userModel.types.js";
 import { type AccessTokenPayload, type RefreshTokenPayload } from "../types/jwt.types.js";
 
 
-const userSchema = new Schema<
-  IUser,
-  Model<IUser, {}, IUserMethods>,
-  IUserMethods
->(
+const userSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>, IUserMethods>(
   {
-    username: {
+    name: {
       type: String,
       required: true,
       trim: true,
@@ -21,10 +17,6 @@ const userSchema = new Schema<
       required: true,
       unique: true,
       lowercase: true,
-    },
-    mobile_no: {
-      type: Number,
-      unique: true,
     },
     password: {
       type: String,
@@ -61,7 +53,7 @@ userSchema.methods.generateAccessToken = function (): string {
   return jwt.sign(
     {
       _id: this._id,
-      username: this.username,
+      username: this.name,
       email: this.email,
 
     } as AccessTokenPayload,
@@ -77,7 +69,7 @@ userSchema.methods.generateRefreshToken = function (): string {
     {
       _id: this._id,
       email: this.email,
-      
+
     } as RefreshTokenPayload,
     process.env.REFRESH_TOKEN_SECRET as string,
     {

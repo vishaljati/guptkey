@@ -3,9 +3,8 @@ import mongoose from "mongoose";
 export interface IUser {
   
   _id: mongoose.Types.ObjectId;
-  username: string;
+  name: string;
   email: string;
-  mobile_no?: number;
   password: string;
   isVerified: boolean
   refreshToken?: string
