@@ -3,6 +3,7 @@ import { AsyncHandler, ApiError, ApiResponse } from "../utils/index.js";
 import { User } from "../models/user.models.js";
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
+import { type RefreshTokenPayload } from "../types/jwt.types.js";
 
 const generateAccessAndRefreshTokens = async (userId: Types.ObjectId) => {
     try {
@@ -145,8 +146,64 @@ const logoutUser = AsyncHandler(async (req: Request, res: Response) => {
     }
 })
 
+const refreshAccessToken = AsyncHandler(async (req: Request, res: Response) => {
+
+    const cookies = req.cookies || {}   // cookies not cookie
+    const body = req.body || {}
+
+
+    const incomingRefreshToken = cookies.refreshToken || body.refreshToken;
+
+
+    if (!incomingRefreshToken || typeof incomingRefreshToken !== "string" || !incomingRefreshToken.trim()) {
+        throw new ApiError(401, "Unauthorized request: Refresh token missing or invalid");
+    }
+
+    try {
+        const decodedToken = jwt.verify(
+            incomingRefreshToken,
+            process.env.REFRESH_TOKEN_SECRET as string
+        ) as RefreshTokenPayload
+
+        const user = await User.findById(decodedToken._id)
+
+        if (!user) {
+            throw new ApiError(401, "Invalid refresh token");
+        }
+
+        if (incomingRefreshToken !== user?.refreshToken) {
+            throw new ApiError(401, "Refresh token is expired or used");
+        }
+
+        const option = {
+            httpOnly: true,
+            secure: true
+        }
+
+        const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
+
+
+        return res.status(200)
+            .cookie("accessToken", accessToken, option)
+            .cookie("refreshToken", refreshToken, option)
+            .json(
+                new ApiResponse(
+                    200,
+                    "Access Token Refreshed Successfully",
+                    {
+                        accessToken: accessToken,
+                        refreshToken: refreshToken
+                    },
+                )
+            )
+    } catch (error) {
+        return res.status(403).json({ message: "Invalid or expired refresh token" });
+    }
+})
+
 export {
     registerUser,
     loginUser,
     logoutUser,
+    refreshAccessToken
 }
