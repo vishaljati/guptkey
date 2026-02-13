@@ -1,4 +1,4 @@
-import express, { type Application,type Request,type Response } from "express";
+import express, { type Application, type Request, type Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser"
 
@@ -24,7 +24,9 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 import authRouter from "./routes/auth.routes.js"
+import passwordVaultRouter from "./routes/passwordVault.routes.js"
 
-app.use("/api/v1/auth",authRouter)
+app.use("/api/v1/auth", authRouter)
+app.use("/api/v1/vault", passwordVaultRouter)
 
 export default app;

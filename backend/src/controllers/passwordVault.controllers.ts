@@ -102,8 +102,19 @@ const getPasswordVault = AsyncHandler(async (req: Request, res: Response) => {
     }
 });
 
-const deletePasswordVault= AsyncHandler(async(req:Request,res:Response)=>{
-
+const deletePasswordVault = AsyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user._id
+    try {
+        //otp logic
+        const deletedPasswordVault = await EncryptedPassword.deleteOne({ userId: new mongoose.Types.ObjectId(userId) })
+        if (!deletedPasswordVault) {
+            throw new ApiError(500, "Server error: Vault deletion failed")
+        }
+        return res.status(200).json(new ApiResponse(200, "Password vault deleted successfully"))
+    } catch (error) {
+        console.log("Error :", error);
+        throw new ApiError(500, "Something went wrong while deleting password vault")
+    }
 })
 
 export {
