@@ -14,7 +14,7 @@ router.use(verifyUser)
 
 router.post("/createvault", createPasswordVault)
 router.patch("/updatevault", updatePasswordVault)
-router.post("/getvault", getPasswordVault)
-router.post("/deletevault", deletePasswordVault)
+router.get("/getvault", getPasswordVault)
+router.delete("/deletevault", deletePasswordVault)
 
 export default router;

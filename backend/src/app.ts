@@ -27,6 +27,6 @@ import authRouter from "./routes/auth.routes.js"
 import passwordVaultRouter from "./routes/passwordVault.routes.js"
 
 app.use("/api/v1/auth", authRouter)
-app.use("/api/v1/vault", passwordVaultRouter)
+app.use("/api/v1/passvault", passwordVaultRouter)
 
 export default app;

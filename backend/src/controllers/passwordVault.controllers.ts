@@ -58,8 +58,10 @@ const updatePasswordVault = AsyncHandler(async (req: Request, res: Response) => 
         }
 
         const updatedPasswordVault =
-            await EncryptedPassword.findByIdAndUpdate(
-                new mongoose.Types.ObjectId(userId),
+            await EncryptedPassword.findOneAndUpdate(
+                {
+                    userId: new mongoose.Types.ObjectId(userId)
+                },
                 {
                     $set: {
                         encryptedData,
