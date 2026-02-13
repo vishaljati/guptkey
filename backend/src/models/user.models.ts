@@ -28,7 +28,7 @@ const userSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>, IUserMethod
       default: false,
     },
     refreshToken: {
-      type: String,
+      type: String
     },
   },
   {
@@ -45,7 +45,10 @@ userSchema.pre("save", async function () {
 
 userSchema.methods.isPasswordCorrect = async function (
   password: string
-): Promise<boolean> {
+){
+  if (!password) {
+    throw new Error("PASSWORD IS REQUIRED IN BCRYPT")
+  }
   return await bcrypt.compare(password, this.password);
 };
 
@@ -59,7 +62,7 @@ userSchema.methods.generateAccessToken = function (): string {
     } as AccessTokenPayload,
     process.env.ACCESS_TOKEN_SECRET as string,
     {
-      expiresIn: "1d",
+      expiresIn: "10m",
     }
   );
 };
@@ -73,7 +76,7 @@ userSchema.methods.generateRefreshToken = function (): string {
     } as RefreshTokenPayload,
     process.env.REFRESH_TOKEN_SECRET as string,
     {
-      expiresIn: "7d",
+      expiresIn: "30m",
     }
   );
 };

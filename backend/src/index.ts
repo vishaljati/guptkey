@@ -6,7 +6,6 @@ dotenv.config({ path: "./.env" });
 
 const PORT = process.env.PORT as string;
 
-console.log(typeof PORT);
 
 connectDB().then(() => {
     app.listen(PORT, (err) => {

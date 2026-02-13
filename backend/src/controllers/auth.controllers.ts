@@ -71,12 +71,13 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
 
 const loginUser = AsyncHandler(async (req: Request, res: Response) => {
     try {
-        const { email, password } = req.body
+        const { email, password } = req.body || {}
         if (!email || !password) {
             throw new ApiError(400, "Email and Password is required")
 
         }
-        const user = await User.findOne({ email })
+
+        const user = await User.findOne({ email }).select("+password");
 
         if (!user) {
             throw new ApiError(404, "User not found")
@@ -88,8 +89,13 @@ const loginUser = AsyncHandler(async (req: Request, res: Response) => {
             throw new ApiError(401, "Invalid password")
         }
         const userId = user._id
-        const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(userId)
-        const loggedInUser = await User.findById(userId).select("-password -refreshToken")
+        const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(userId);
+
+        if (!accessToken || !refreshToken) {
+            throw new ApiError(500, "ACCESS & REFRESH TOKEN GENERATION FAILED")
+        }
+
+        const loggedInUser = await User.findById(userId).select("-password ")
 
         const options = {
             httpOnly: true,
@@ -110,11 +116,10 @@ const loginUser = AsyncHandler(async (req: Request, res: Response) => {
 })
 
 const logoutUser = AsyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user._id
     try {
         await User.findByIdAndUpdate(
-
-
-            req.user._id,
+            userId,
             {
                 $set: {
                     refreshToken: undefined
@@ -146,7 +151,7 @@ const logoutUser = AsyncHandler(async (req: Request, res: Response) => {
 
 const refreshAccessToken = AsyncHandler(async (req: Request, res: Response) => {
 
-    const cookies = req.cookies || {}   
+    const cookies = req.cookies || {}
     const body = req.body || {}
 
 
