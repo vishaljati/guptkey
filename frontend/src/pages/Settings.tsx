@@ -69,6 +69,7 @@ const SettingsPage = () => {
                 value={timeout}
                 onChange={(e) => { setTimeoutVal(e.target.value); toast({ title: "Saved", description: `Session timeout set to ${e.target.value} minutes.` }); }}
                 className="px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
+                title="Select session timeout duration"
               >
                 <option value="5">5 minutes</option>
                 <option value="15">15 minutes</option>
