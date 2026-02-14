@@ -76,23 +76,29 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
 
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1.5">Site Name</label>
+            <label htmlFor="site" className="block text-sm font-medium text-muted-foreground mb-1.5">Site Name</label>
             <input
+              id="site"
               type="text"
               value={site}
               onChange={(e) => setSite(e.target.value)}
               placeholder="e.g. GitHub"
+              title="Site name"
+              aria-label="Site name"
               className="w-full px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1.5">Username / Email</label>
+            <label htmlFor="username" className="block text-sm font-medium text-muted-foreground mb-1.5">Username / Email</label>
             <input
+              id="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="user@example.com"
+              title="Username or email"
+              aria-label="Username or email"
               className="w-full px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
             />
           </div>
@@ -143,6 +149,7 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
                 </button>
               </div>
               <input
+                title="password gen input"
                 type="range"
                 min={8}
                 max={64}

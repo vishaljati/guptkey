@@ -1,11 +1,18 @@
 import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { 
-  KeyRound, Eye, EyeOff, Loader2, ShieldCheck, 
-  Lock, User, Mail, ArrowRight, Fingerprint 
+import {
+  KeyRound, Eye, EyeOff, Loader2, ShieldCheck,
+  Lock, User, Mail, ArrowRight, Fingerprint
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
+import { generateSalt, bufferToBase64 } from "@/crypto/utils";
+import { deriveKey } from "@/crypto/deriveKey";
+import { encryptVault } from "@/crypto/encrypt";
+import { base64ToBuffer } from "@/crypto/utils";
+import { decryptVault } from "@/crypto/decrypt";
+import api from "@/lib/axios";
+
 
 // --- Utility: Password Strength Logic ---
 const getStrength = (pw: string) => {
@@ -52,14 +59,56 @@ const LoginForm = ({ onToggle }: { onToggle: () => void }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast({ title: "Access Granted", description: "Decrypting your vault..." });
+    if (!email || !password) return;
+
+    try {
+      setLoading(true);
+
+      // 1️⃣ Authenticate
+      const { data } = await api.post("/auth/login", {
+        email,
+        password,
+      });
+
+      // data must include:
+      // encryptedData
+      // iv
+      // salt
+
+      // 2️⃣ Convert salt
+      const saltBuffer = base64ToBuffer(data.salt);
+
+      // 3️⃣ Derive key again
+      const key = await deriveKey(password, new Uint8Array(saltBuffer));
+
+      // 4️⃣ Decrypt vault
+      const vault = await decryptVault(
+        data.encryptedData,
+        data.iv,
+        key
+      );
+
+      // 5️⃣ Store vault in memory (context recommended)
+      console.log("Vault:", vault);
+
+      toast({
+        title: "Vault Decrypted",
+        description: "Access granted.",
+      });
+
       window.location.href = "/dashboard";
-    }, 1500);
+
+    } catch (error: any) {
+      toast({
+        title: "Login Failed",
+        description: error.response?.data?.message || "Invalid credentials",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -135,15 +184,54 @@ const SignUpForm = ({ onToggle }: { onToggle: () => void }) => {
 
   const strength = getStrength(formData.password);
 
-  const handleRegister = (e: React.FormEvent) => {
+
+
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      toast({ title: "Vault Initialized", description: "Welcome to the gold standard of privacy." });
+    if (!formData.email || !formData.password) return;
+
+    try {
+      setLoading(true);
+
+      // 1️⃣ Generate salt
+      const salt = generateSalt();
+
+      // 2️⃣ Derive key
+      const key = await deriveKey(formData.password, salt);
+
+      // 3️⃣ Empty vault
+      const emptyVault = { entries: [] };
+
+      // 4️⃣ Encrypt
+      const { encryptedData, iv } = await encryptVault(emptyVault, key);
+
+      // 5️⃣ Send to backend
+      await api.post("/auth/register", {
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        encryptedData,
+        iv,
+        salt: bufferToBase64(salt.buffer),
+      });
+
+      toast({
+        title: "Vault Initialized",
+        description: "Your encrypted vault is ready.",
+      });
+
       window.location.href = "/dashboard";
-    }, 1500);
+
+    } catch (error: any) {
+      toast({
+        title: "Registration Failed",
+        description: error.response?.data?.message || "Something went wrong",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <div className="space-y-6">
@@ -160,7 +248,7 @@ const SignUpForm = ({ onToggle }: { onToggle: () => void }) => {
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="w-full pl-11 pr-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none transition-all"
               placeholder="Vishal Jati"
               required
@@ -175,7 +263,7 @@ const SignUpForm = ({ onToggle }: { onToggle: () => void }) => {
             <input
               type="email"
               value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               className="w-full pl-11 pr-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none transition-all"
               placeholder="name@company.com"
               required
@@ -190,7 +278,7 @@ const SignUpForm = ({ onToggle }: { onToggle: () => void }) => {
             <input
               type={showPassword ? "text" : "password"}
               value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               className="w-full pl-11 pr-12 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none transition-all"
               placeholder="••••••••••••"
               required
@@ -287,7 +375,7 @@ const Auth = () => {
       {/* RIGHT: Auth Container */}
       <div className="flex-1 flex items-center justify-center p-6 relative">
         <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2" />
-        
+
         <motion.div
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
@@ -296,7 +384,7 @@ const Auth = () => {
           <div className="bg-slate-900/40 backdrop-blur-2xl border border-slate-800 p-8 sm:p-10 rounded-[2rem] shadow-2xl relative overflow-hidden">
             {/* Animated top border line */}
             <div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
-            
+
             <AnimatePresence mode="wait">
               <motion.div
                 key={isRegister ? "register-form" : "login-form"}
