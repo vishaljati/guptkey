@@ -69,7 +69,7 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
           <h2 className="text-lg font-semibold text-foreground">
             {editEntry ? "Edit Password" : "Add New Password"}
           </h2>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors" title="Close modal" aria-label="Close modal">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -112,6 +112,8 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="p-1.5 text-muted-foreground hover:text-foreground transition-colors"
+                  title={showPassword ? "Hide password" : "Show password"}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -119,6 +121,8 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
                   type="button"
                   onClick={() => setShowGenerator(!showGenerator)}
                   className="p-1.5 text-muted-foreground hover:text-primary transition-colors"
+                  title="Password generator"
+                  aria-label="Password generator"
                 >
                   <RefreshCw className="w-4 h-4" />
                 </button>
@@ -154,6 +158,8 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
                       checked={genOptions[key]}
                       onChange={() => setGenOptions((o) => ({ ...o, [key]: !o[key] }))}
                       className="rounded border-border accent-primary"
+                      title={`Include ${key}`}
+                      aria-label={`Include ${key}`}
                     />
                     {key.charAt(0).toUpperCase() + key.slice(1)}
                   </label>
@@ -163,12 +169,15 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
           )}
 
           <div>
-            <label className="block text-sm font-medium text-muted-foreground mb-1.5">Notes (optional)</label>
+            <label htmlFor="notes" className="block text-sm font-medium text-muted-foreground mb-1.5">Notes (optional)</label>
             <textarea
+              id="notes"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               rows={3}
               placeholder="Additional notes..."
+              title="Notes"
+              aria-label="Notes"
               className="w-full px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all resize-none"
             />
           </div>
