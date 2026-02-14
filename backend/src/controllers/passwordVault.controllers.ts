@@ -66,7 +66,6 @@ const updatePasswordVault = AsyncHandler(async (req: Request, res: Response) => 
                         encryptedData,
                         iv,
                         salt
-
                     }
                 },
                 {

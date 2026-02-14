@@ -1,0 +1,12 @@
+AUTH ROUTES
+/api/v1/auth/signup POST - Register a new user
+/api/v1/auth/login POST - Authenticate a user and return a token
+/api/v1/auth/logout POST - Log out a user and invalidate the token
+/api/v1/auth/refresh POST - Refresh the authentication token
+
+PASSWORD ROUTES
+/api/v1/passvault/createvault POST - Create a new password vault
+/api/v1/passvault/getvault GET - Retrieve all password vaults for the authenticated user
+/api/v1/passvault/updatevault PATCH - Update password vault 
+/api/v1/passvault/deletevault DELETE - Delete a  password vault 
+
