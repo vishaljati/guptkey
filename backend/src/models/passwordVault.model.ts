@@ -8,7 +8,6 @@ const EncryptedPasswordSchema = new Schema<IEncryptedPassword, Model<IEncryptedP
       ref: "User",
       required: true,
       unique:true,
-      index: true
     },
 
     encryptedData: {
@@ -21,17 +20,11 @@ const EncryptedPasswordSchema = new Schema<IEncryptedPassword, Model<IEncryptedP
       required: true,
     },
 
-    authTag: {
+    salt: {
       type: String,
       required: true,
     },
 
-    // Optional metadata (must NOT reveal sensitive info)
-    siteHint: {
-      type: String,
-      required: false,
-      trim: true,
-    },
   },
   { timestamps: true }
 );

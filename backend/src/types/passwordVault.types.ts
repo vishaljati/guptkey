@@ -6,9 +6,8 @@ export interface IEncryptedPassword {
 
     encryptedData: string;     // Encrypted JSON string (ciphertext)
     iv: string;                // Initialization vector (base64)
-    authTag: string;           // GCM authentication tag (base64)
+    salt: string;           
 
-    siteHint?: string;         // Optional non-sensitive metadata
     createdAt: Date;
     updatedAt: Date;
 

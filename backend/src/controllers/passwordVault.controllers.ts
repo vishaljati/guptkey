@@ -6,11 +6,11 @@ import mongoose from 'mongoose';
 const createPasswordVault = AsyncHandler(async (req: Request, res: Response) => {
     const userId = req.user._id;
 
-    const { encryptedData, iv, authTag, siteHint } = req.body;
+    const { encryptedData, iv, salt } = req.body;
 
     try {
 
-        if (!encryptedData || !iv || !authTag) {
+        if (!encryptedData || !iv || !salt) {
             throw new ApiError(400, "Encyrpted data is required")
         }
 
@@ -23,8 +23,7 @@ const createPasswordVault = AsyncHandler(async (req: Request, res: Response) => 
             userId: new mongoose.Types.ObjectId(userId),
             encryptedData,
             iv,
-            authTag,
-            siteHint: siteHint || ""
+            salt
         })
 
         if (!newPasswordVault) {
@@ -49,11 +48,11 @@ const updatePasswordVault = AsyncHandler(async (req: Request, res: Response) => 
 
     const userId = req.user._id;
 
-    const { encryptedData, iv, authTag, siteHint } = req.body;
+    const { encryptedData, iv, salt } = req.body;
 
     try {
 
-        if (!encryptedData || !iv || !authTag) {
+        if (!encryptedData || !iv || !salt) {
             throw new ApiError(400, "Encyrpted data is required")
         }
 
@@ -66,8 +65,7 @@ const updatePasswordVault = AsyncHandler(async (req: Request, res: Response) => 
                     $set: {
                         encryptedData,
                         iv,
-                        authTag,
-                        siteHint: siteHint || ""
+                        salt
 
                     }
                 },
