@@ -4,6 +4,7 @@ import { User } from "../models/user.models.js";
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
 import { type RefreshTokenPayload } from "../types/jwt.types.js";
+import { EncryptedPassword } from "../models/passwordVault.model.js";
 
 const generateAccessAndRefreshTokens = async (userId: Types.ObjectId) => {
     try {
@@ -33,35 +34,54 @@ const generateAccessAndRefreshTokens = async (userId: Types.ObjectId) => {
 
 const registerUser = AsyncHandler(async (req: Request, res: Response) => {
     try {
-        const { name, email, password } = req.body
+        const { name, email, password, encryptedData, iv, salt } = req.body
         if (!name || !email) {
             throw new ApiError(400, "Name and Email is required")
         }
         if (!password) {
             throw new ApiError(400, "Password is required")
         }
+        if (!encryptedData || !iv || !salt) {
+            throw new ApiError(400, "Encrypted data, IV and salt are required")
+        }
 
         const existedUser = await User.findOne({ email })
 
         if (existedUser) {
-            throw new ApiError(409, "Username or Email already exists")
+            const existedEncryptedPassword = await EncryptedPassword.findOne({ userId: existedUser._id })
+            if (existedEncryptedPassword) {
+                throw new ApiError(409, "Username or Email already exists with encrypted password vault")
+            }
+        }
+        if (existedUser) {
+            throw new ApiError(409, "Email already exists")
         }
 
         const newUser = await User.create({
             name,
             email,
             password,
-            isVerified: false
         })
-        const createdUser = await User.findById(newUser._id).select("-password -refreshToken -__v")
+        const createdUser = await User.findOne({ email }).select("-password -refreshToken -__v")
         if (!createdUser) {
             throw new ApiError(500, "User creation failed in DB")
+        }
+        const createdEncryptedPasswordVault = await EncryptedPassword.create({
+            userId: createdUser._id,
+            encryptedData,
+            iv,
+            salt
+        })
+        
+        if (!createdEncryptedPasswordVault) {
+            throw new ApiError(500, "Encrypted password vault creation failed in DB")
         }
 
         //NOTE:Sending registration mail
         return res.status(201).json(
             new ApiResponse
                 (201, "User registered successfully", createdUser))
+
     } catch (error) {
         console.error("Something went wrong while registering user", error)
         return
