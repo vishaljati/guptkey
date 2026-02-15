@@ -1,3 +1,4 @@
+import {  base64ToBuffer } from "./utils";
 export const decryptVault = async (
   encryptedData: string,
   ivBase64: string,
@@ -11,20 +12,13 @@ export const decryptVault = async (
     ["decrypt"]
   );
 
-  const encryptedBytes = Uint8Array.from(
-    atob(encryptedData),
-    c => c.charCodeAt(0)
-  );
-
-  const iv = Uint8Array.from(
-    atob(ivBase64),
-    c => c.charCodeAt(0)
-  );
+  const encryptedBuffer = base64ToBuffer(encryptedData);
+  const ivBuffer = base64ToBuffer(ivBase64);
 
   const decrypted = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv },
+    { name: "AES-GCM", iv: new Uint8Array(ivBuffer) },
     key,
-    encryptedBytes
+    encryptedBuffer
   );
 
   const decoded = new TextDecoder().decode(decrypted);

@@ -1,7 +1,4 @@
-import argon2 from "argon2-browser";
-
-//This converts:
-//---Master password → secure 256-bit key
+﻿import argon2 from "argon2-browser/dist/argon2-bundled.min.js";
 
 export const deriveKey = async (
   password: string,
@@ -11,12 +8,11 @@ export const deriveKey = async (
     pass: password,
     salt,
     type: argon2.ArgonType.Argon2id,
-    hashLen: 32, // 256-bit key
+    hashLen: 32,
     time: 3,
     mem: 65536,
     parallelism: 1,
   });
 
-  return result.hash.slice(0);
-
+  return new Uint8Array(result.hash).buffer;
 };

@@ -1,8 +1,7 @@
-import { Toaster } from "@/components/ui/toaster";
+﻿import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-//pages
 import Landing from "./pages/Landing";
 import SignupPage from "./pages/SignupPage";
 import LoginPage from "./pages/LoginPage";
@@ -11,65 +10,57 @@ import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import AuthLayout from "./components/layout/Authlayout";
 
-
-
 const App = () => (
-
   <TooltipProvider>
     <Toaster />
     <Sonner />
     <BrowserRouter>
       <Routes>
-        //Landing Page
         <Route
           path="/"
           element={
             <AuthLayout authentication={false}>
               <Landing />
-            </AuthLayout>}
+            </AuthLayout>
+          }
         />
 
-        //Signup page
         <Route
           path="/signup"
           element={
             <AuthLayout authentication={false}>
               <SignupPage />
             </AuthLayout>
-
           }
         />
-        //Login page
+
         <Route
           path="/login"
           element={
             <AuthLayout authentication={false}>
               <LoginPage />
             </AuthLayout>
-
           }
         />
-        //Dashboard
+
         <Route
           path="/dashboard"
           element={
             <AuthLayout authentication={true}>
               <Dashboard />
             </AuthLayout>
-
           }
         />
-        //Favourites items
+
         <Route
           path="/dashboard/*"
           element={
             <AuthLayout authentication={true}>
               <Dashboard />
             </AuthLayout>
-
           }
         />
-        //Settings Page
+
         <Route
           path="/settings"
           element={
@@ -79,13 +70,10 @@ const App = () => (
           }
         />
 
-        //404
         <Route path="*" element={<NotFound />} />
-
       </Routes>
     </BrowserRouter>
   </TooltipProvider>
-
 );
 
 export default App;

@@ -3,46 +3,7 @@ import { ApiError, AsyncHandler, ApiResponse } from "../utils/index.js";
 import { type Request, type Response } from 'express';
 import mongoose from 'mongoose';
 
-const createPasswordVault = AsyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user._id;
 
-    const { encryptedData, iv, salt } = req.body;
-
-    try {
-
-        if (!encryptedData || !iv || !salt) {
-            throw new ApiError(400, "Encyrpted data is required")
-        }
-
-        const isPasswordVaultExisted = await EncryptedPassword.findOne({ userId })
-        if (isPasswordVaultExisted) {
-            throw new ApiError(409, "Password vault is already existed for this user")
-        }
-
-        const newPasswordVault = await EncryptedPassword.create({
-            userId: new mongoose.Types.ObjectId(userId),
-            encryptedData,
-            iv,
-            salt
-        })
-
-        if (!newPasswordVault) {
-            throw new ApiError(500, "Password vault creation failed")
-        }
-
-        const createdPasswordVaultforUser = await EncryptedPassword.findById(newPasswordVault._id).select("-__v")
-
-        if (!createdPasswordVaultforUser) {
-            throw new ApiError(500, "Password vault fetching failed")
-        }
-
-        return res.status(201).json(new ApiResponse(201, "Password vault created and saved successfully", createdPasswordVaultforUser))
-    } catch (error) {
-        console.log("Error :", error);
-        return null
-    }
-
-});
 
 const updatePasswordVault = AsyncHandler(async (req: Request, res: Response) => {
 
@@ -117,7 +78,6 @@ const deletePasswordVault = AsyncHandler(async (req: Request, res: Response) => 
 })
 
 export {
-    createPasswordVault,
     updatePasswordVault,
     getPasswordVault,
     deletePasswordVault

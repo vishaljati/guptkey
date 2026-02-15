@@ -1,6 +1,5 @@
 import { Router } from "express";
 import {
-    createPasswordVault,
     updatePasswordVault,
     getPasswordVault,
     deletePasswordVault
@@ -12,7 +11,7 @@ const router = Router();
 
 router.use(verifyUser)
 
-router.post("/createvault", createPasswordVault)
+
 router.patch("/updatevault", updatePasswordVault)
 router.get("/getvault", getPasswordVault)
 router.delete("/deletevault", deletePasswordVault)

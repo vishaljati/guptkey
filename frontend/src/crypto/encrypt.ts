@@ -1,8 +1,10 @@
+import { bufferToBase64 , base64ToBuffer } from "./utils";
+
 export const encryptVault = async (
   data: object,
   keyBuffer: ArrayBuffer
 ) => {
-  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const iv = crypto.getRandomValues(new Uint8Array(12)); // 96-bit IV
 
   const key = await crypto.subtle.importKey(
     "raw",
@@ -21,9 +23,7 @@ export const encryptVault = async (
   );
 
   return {
-    encryptedData: btoa(
-      String.fromCharCode(...new Uint8Array(encrypted))
-    ),
-    iv: btoa(String.fromCharCode(...iv)),
+    encryptedData: bufferToBase64(encrypted),
+    iv: bufferToBase64(iv.buffer),
   };
 };

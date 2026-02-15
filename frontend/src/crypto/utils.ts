@@ -1,16 +1,29 @@
 export const generateSalt = (): Uint8Array => {
-  return crypto.getRandomValues(new Uint8Array(16));
+  return crypto.getRandomValues(new Uint8Array(16)); // 128-bit salt
 };
 
-export function bufferToBase64(buffer: ArrayBuffer | SharedArrayBuffer): string {
-  const view = new Uint8Array(buffer);
-  return btoa(String.fromCharCode.apply(null, Array.from(view)));
-}
-export const base64ToBuffer = (base64: string) => {
+
+export const bufferToBase64 = (buffer: ArrayBuffer): string => {
+  const bytes = new Uint8Array(buffer);
+  let binary = "";
+  const chunkSize = 0x8000; // 32KB chunks to prevent stack overflow
+
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+
+  return btoa(binary);
+};
+
+export const base64ToBuffer = (base64: string): ArrayBuffer => {
   const binary = atob(base64);
-  const bytes = new Uint8Array(binary.length);
-  for (let i = 0; i < binary.length; i++) {
+  const length = binary.length;
+  const bytes = new Uint8Array(length);
+
+  for (let i = 0; i < length; i++) {
     bytes[i] = binary.charCodeAt(i);
   }
+
   return bytes.buffer;
 };
