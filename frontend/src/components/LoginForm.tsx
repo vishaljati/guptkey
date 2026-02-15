@@ -1,20 +1,19 @@
 import { useState } from "react";
-import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import { Link , useNavigate } from "react-router-dom";
 import {
-    KeyRound, Eye, EyeOff, Loader2, ShieldCheck,
-    Lock, User, Mail, ArrowRight, Fingerprint
+    Eye, EyeOff, Loader2, 
+    Lock, Mail, Fingerprint
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 
-import api from "@/lib/axios";
+
 
 const LoginForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-
+    const navigate = useNavigate()
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -22,7 +21,7 @@ const LoginForm = () => {
 
         try {
             setLoading(true);
-            window.location.href = "/dashboard";
+            
 
         } catch (error: any) {
             toast({

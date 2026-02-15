@@ -4,25 +4,24 @@ export interface SignupPayload {
   name: string;
   email: string;
   password: string;
+  encryptedData: string;
+  iv: string;
+  salt: string;
 }
 export interface LoginPayload {
   email: string;
   password: string;
 }
 
-// export interface AuthResponse {
-//   accessToken: string;
-//   user: {
-//     _id: string;
-//     email: string;
-//   };
-// }
+
 
 export const SignupUser = async (
   payload: SignupPayload 
 )=> {
-  const { data } = await api.post("/auth/signup", payload);
-  return data;
+  const res = await api.post("/auth/signup", payload);
+  console.log("Backend Response: ",res);
+  
+  return res;
 };
 
 export const logoutUser = async () => {

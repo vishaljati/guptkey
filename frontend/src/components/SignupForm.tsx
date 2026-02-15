@@ -7,6 +7,11 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 import { SignupUser } from "@/service/auth.api"
+import { createEmptyVault } from "@/crypto/vaultFactory"
+import { generateSalt, bufferToBase64 } from "@/crypto/utils";
+import { deriveKey } from "@/crypto/deriveKey";
+import { encryptVault } from "@/crypto/encrypt";
+
 
 const getStrength = (pw: string) => {
   let score = 0;
@@ -22,6 +27,7 @@ const getStrength = (pw: string) => {
   return { label: "Very Strong", pct: 100, color: "bg-primary" };
 };
 
+
 const SignUpForm = () => {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
@@ -33,14 +39,30 @@ const SignUpForm = () => {
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.email || !formData.password) return;
+    if (!formData.email || !formData.password || !formData.name) {
+      return;
+    }
     setLoading(true)
     try {
+      const salt = generateSalt();
+      const key = await deriveKey(
+        formData.password,
+        salt
+      );
+      const emptyVault = createEmptyVault()
+
+      const { encryptedData, iv } = await encryptVault(
+        emptyVault,
+        key
+      );
 
       const res = await SignupUser({
         name: formData.name,
         email: formData.email,
-        password: formData.password
+        password: formData.password,
+        encryptedData,
+        iv,
+        salt: bufferToBase64(salt.buffer),
       })
       console.log("Backend RESPONSE", res);
 
