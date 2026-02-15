@@ -1,0 +1,104 @@
+import { useState } from "react";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
+import {
+    KeyRound, Eye, EyeOff, Loader2, ShieldCheck,
+    Lock, User, Mail, ArrowRight, Fingerprint
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "@/hooks/use-toast";
+
+
+import api from "@/lib/axios";
+
+const navigate = useNavigate()
+
+
+const LoginForm = ({ onToggle }: { onToggle: () => void }) => {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [loading, setLoading] = useState(false);
+
+
+    const handleLogin = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!email || !password) return;
+
+        try {
+            setLoading(true);
+            window.location.href = "/dashboard";
+
+        } catch (error: any) {
+            toast({
+                title: "Login Failed",
+                description: error.response?.data?.message || "Invalid credentials",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <div className="space-y-2 text-center sm:text-left">
+                <h1 className="text-3xl font-bold tracking-tight">Welcome Back</h1>
+                <p className="text-slate-400">Unlock your encrypted workspace.</p>
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-4">
+                <div className="space-y-2">
+                    <label className="text-xs font-bold uppercase tracking-widest text-slate-500 ml-1">Email</label>
+                    <div className="relative group">
+                        <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-primary transition-colors" />
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full pl-11 pr-4 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none transition-all"
+                            placeholder="agent@guptkey.com"
+                            required
+                        />
+                    </div>
+                </div>
+
+                <div className="space-y-2">
+                    <div className="flex justify-between items-center ml-1">
+                        <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Master Password</label>
+                        <button type="button" className="text-[10px] text-primary hover:underline uppercase tracking-tighter">Forgot Key?</button>
+                    </div>
+                    <div className="relative group">
+                        <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 group-focus-within:text-primary transition-colors" />
+                        <input
+                            type={showPassword ? "text" : "password"}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            className="w-full pl-11 pr-12 py-3 bg-slate-950/50 border border-slate-800 rounded-xl focus:ring-2 focus:ring-primary/20 focus:border-primary/50 outline-none transition-all"
+                            placeholder="••••••••••••"
+                            required
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-200"
+                        >
+                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                    </div>
+                </div>
+
+                <button
+                    disabled={loading}
+                    className="w-full py-4 bg-primary text-primary-foreground font-bold rounded-xl hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg shadow-primary/20"
+                >
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Fingerprint className="w-5 h-5" /> Unlock Vault</>}
+                </button>
+            </form>
+
+            <div className="text-center pt-4 border-t border-slate-800/50">
+                <p className="text-sm text-slate-500">
+                    New to GuptKey? <button onClick={onToggle} className="text-primary font-bold hover:underline">Create a new vault</button>
+                </p>
+            </div>
+        </div>
+    );
+};
