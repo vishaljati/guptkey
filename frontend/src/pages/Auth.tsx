@@ -1,19 +1,16 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams ,useNavigate} from "react-router-dom";
 import {
   KeyRound, Eye, EyeOff, Loader2, ShieldCheck,
   Lock, User, Mail, ArrowRight, Fingerprint
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
-import { generateSalt, bufferToBase64 } from "@/crypto/utils";
-import { deriveKey } from "@/crypto/deriveKey";
-import { encryptVault } from "@/crypto/encrypt";
-import { base64ToBuffer } from "@/crypto/utils";
-import { decryptVault } from "@/crypto/decrypt";
+
+
 import api from "@/lib/axios";
 
-
+const navigate=useNavigate()
 // --- Utility: Password Strength Logic ---
 const getStrength = (pw: string) => {
   let score = 0;
@@ -66,39 +63,6 @@ const LoginForm = ({ onToggle }: { onToggle: () => void }) => {
 
     try {
       setLoading(true);
-
-      // 1️⃣ Authenticate
-      const { data } = await api.post("/auth/login", {
-        email,
-        password,
-      });
-
-      // data must include:
-      // encryptedData
-      // iv
-      // salt
-
-      // 2️⃣ Convert salt
-      const saltBuffer = base64ToBuffer(data.salt);
-
-      // 3️⃣ Derive key again
-      const key = await deriveKey(password, new Uint8Array(saltBuffer));
-
-      // 4️⃣ Decrypt vault
-      const vault = await decryptVault(
-        data.encryptedData,
-        data.iv,
-        key
-      );
-
-      // 5️⃣ Store vault in memory (context recommended)
-      console.log("Vault:", vault);
-
-      toast({
-        title: "Vault Decrypted",
-        description: "Access granted.",
-      });
-
       window.location.href = "/dashboard";
 
     } catch (error: any) {
@@ -185,42 +149,25 @@ const SignUpForm = ({ onToggle }: { onToggle: () => void }) => {
   const strength = getStrength(formData.password);
 
 
-
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email || !formData.password) return;
 
     try {
-      setLoading(true);
 
-      // 1️⃣ Generate salt
-      const salt = generateSalt();
+      const registerUser=await api.post("/auth/signup",
+        {
+          name:formData.name,
+          email:formData.email,
+          password:formData.password
+        }
+      )
+      if (!registerUser) {
+        console.warn("User registration failed..Try again later")
+        throw new Error("Backend for registration failed")
+      }
 
-      // 2️⃣ Derive key
-      const key = await deriveKey(formData.password, salt);
-
-      // 3️⃣ Empty vault
-      const emptyVault = { entries: [] };
-
-      // 4️⃣ Encrypt
-      const { encryptedData, iv } = await encryptVault(emptyVault, key);
-
-      // 5️⃣ Send to backend
-      await api.post("/auth/register", {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-        encryptedData,
-        iv,
-        salt: bufferToBase64(salt.buffer),
-      });
-
-      toast({
-        title: "Vault Initialized",
-        description: "Your encrypted vault is ready.",
-      });
-
-      window.location.href = "/dashboard";
+       navigate("/auth");
 
     } catch (error: any) {
       toast({
