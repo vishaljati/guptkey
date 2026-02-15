@@ -19,8 +19,6 @@ export const SignupUser = async (
   payload: SignupPayload 
 )=> {
   const res = await api.post("/auth/signup", payload);
-  console.log("Backend Response: ",res);
-  
   return res;
 };
 

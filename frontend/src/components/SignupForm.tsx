@@ -66,23 +66,14 @@ const SignUpForm = () => {
 
     try {
       setLoading(true);
-
-      // 1️⃣ Generate Salt
       const salt = generateSalt();
-
-      // 2️⃣ Derive Key
       const key = await deriveKey(formData.password, salt);
-
-      // 3️⃣ Create Empty Vault
       const emptyVault = createEmptyVault();
 
-      // 4️⃣ Encrypt Vault
-      const {  encryptedData , iv } = await encryptVault(
+      const { encryptedData, iv } = await encryptVault(
         emptyVault,
         key
       );
-
-      // 5️⃣ Send To Backend
       const res = await SignupUser({
         name: formData.name,
         email: formData.email,
@@ -95,10 +86,9 @@ const SignUpForm = () => {
         ,
       });
 
-      // 6️⃣ Validate Response Structure
-      if (!res?.data?.success) {
+      if (res.status !== 201) {
         throw new Error(
-          res?.data?.message || "Registration failed"
+          res?.data?.data?.message || "Registration failed"
         );
       }
 
