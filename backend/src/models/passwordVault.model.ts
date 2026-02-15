@@ -29,7 +29,4 @@ const EncryptedPasswordSchema = new Schema<IEncryptedPassword, Model<IEncryptedP
   { timestamps: true }
 );
 
-export const EncryptedPassword = mongoose.model<IEncryptedPassword, Model<IEncryptedPassword, {}, {}>>(
-  "EncryptedPassword",
-  EncryptedPasswordSchema
-);
+export const EncryptedPassword = mongoose.model<IEncryptedPassword, Model<IEncryptedPassword, {}, {}>>("EncryptedPassword",EncryptedPasswordSchema);

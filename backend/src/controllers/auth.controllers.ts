@@ -50,7 +50,8 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
         const newUser = await User.create({
             name,
             email,
-            password
+            password,
+            isVerified: false
         })
         const createdUser = await User.findById(newUser._id).select("-password -refreshToken -__v")
         if (!createdUser) {
@@ -60,7 +61,7 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
         //NOTE:Sending registration mail
         return res.status(201).json(
             new ApiResponse
-                (201, "User registered successfully", createdUser).toJSON())
+                (201, "User registered successfully", createdUser))
     } catch (error) {
         console.error("Something went wrong while registering user", error)
         return

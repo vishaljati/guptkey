@@ -7,7 +7,7 @@ const app: Application = express();
 
 app.use(
   cors({
-    origin: process.env.REACT_CLIENT_URL,
+    origin: process.env.REACT_CLIENT_URL || "http://localhost:8080",
     credentials: true,
   })
 );

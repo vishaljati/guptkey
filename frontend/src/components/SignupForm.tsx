@@ -6,8 +6,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
-import api from "@/lib/axios";
-
+import { SignupUser } from "@/service/auth.api"
 
 const getStrength = (pw: string) => {
   let score = 0;
@@ -27,6 +26,7 @@ const SignUpForm = () => {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const strength = getStrength(formData.password);
 
@@ -34,22 +34,29 @@ const SignUpForm = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email || !formData.password) return;
-
+    setLoading(true)
     try {
 
-      const registerUser = await api.post("/auth/signup",
-        {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password
-        }
-      )
-      if (!registerUser) {
-        console.warn("User registration failed..Try again later")
+      const res = await SignupUser({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password
+      })
+      console.log("Backend RESPONSE", res);
+
+      if (!res) {
+        toast({
+          title: "Registration Failed",
+          description: "Internal Server Error",
+        });
         throw new Error("Backend for registration failed")
       }
+      toast({
+        title: "Registration Successful !",
+        description: "Redirecting to login..."
+      });
 
-      window.location.href="/login"
+      navigate("/login");
 
     } catch (error: any) {
       toast({

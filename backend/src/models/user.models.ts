@@ -16,7 +16,6 @@ const userSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>, IUserMethod
       required: true,
       unique: true,
       lowercase: true,
-      index:true
     },
     password: {
       type: String,
@@ -62,7 +61,7 @@ userSchema.methods.generateAccessToken = function (): string {
     } as AccessTokenPayload,
     process.env.ACCESS_TOKEN_SECRET as string,
     {
-      expiresIn: "10m",
+      expiresIn: "30m",
     }
   );
 };
@@ -76,13 +75,10 @@ userSchema.methods.generateRefreshToken = function (): string {
     } as RefreshTokenPayload,
     process.env.REFRESH_TOKEN_SECRET as string,
     {
-      expiresIn: "30m",
+      expiresIn: "1h",
     }
   );
 };
 
 
-export const User = model<IUser, Model<IUser, {}, IUserMethods>>(
-  "User",
-  userSchema
-);
+export const User = model<IUser, Model<IUser, {}, IUserMethods>>("User",userSchema);
