@@ -14,7 +14,7 @@ export default function AuthLayout({ children, authentication = true }) {
         if (authentication && authStatus !== authentication) {
             navigate("/login")
         } else if (!authentication && authStatus !== authentication) {
-            navigate("/")
+            navigate("/dashboard")
         }
         setLoader(false)
     }, [authStatus, navigate, authentication])
