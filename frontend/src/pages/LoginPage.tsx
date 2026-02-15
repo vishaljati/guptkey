@@ -1,20 +1,14 @@
+import LoginForm from "@/components/LoginForm";
 import { useState } from "react";
-import { Link, useSearchParams ,useNavigate} from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import {
-  KeyRound, Eye, EyeOff, Loader2, ShieldCheck,
-  Lock, User, Mail, ArrowRight, Fingerprint
+    KeyRound, Eye, EyeOff, Loader2, ShieldCheck,
+    Lock, User, Mail, ArrowRight, Fingerprint
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 
 
-import api from "@/lib/axios";
-
-const navigate=useNavigate()
-
-
-
-// --- Shared: Security Illustration ---
 const SecurityIllustration = () => (
   <motion.div
     animate={{ y: [0, -15, 0] }}
@@ -37,10 +31,8 @@ const SecurityIllustration = () => (
   </motion.div>
 );
 
+const LoginPage = () => {
 
-const Auth = () => {
-  const [params] = useSearchParams();
-  const [isRegister, setIsRegister] = useState(params.get("register") === "true");
 
   return (
     <div className="min-h-screen bg-[#020817] text-slate-50 flex overflow-hidden">
@@ -60,14 +52,14 @@ const Auth = () => {
         <div className="relative z-10">
           <SecurityIllustration />
           <motion.div
-            key={isRegister ? "reg-text" : "login-text"}
+            key={ "login-text"}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="space-y-6"
           >
             <h2 className="text-5xl font-bold leading-[1.1] tracking-tight">
-              {isRegister ? "Join the gold" : "Your secrets"} <br />
-              {isRegister ? "standard of" : "deserve"} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-emerald-400">privacy.</span>
+              {  "Your secrets"} <br />
+              { "deserve"} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-cyan-300 to-emerald-400">privacy.</span>
             </h2>
             <p className="text-slate-400 max-w-sm text-lg leading-relaxed">
               Zero-knowledge architecture. Open-source transparency. The last vault you'll ever need.
@@ -96,17 +88,15 @@ const Auth = () => {
 
             <AnimatePresence mode="wait">
               <motion.div
-                key={isRegister ? "register-form" : "login-form"}
-                initial={{ opacity: 0, x: isRegister ? 20 : -20 }}
+                key={"login-form"}
+                initial={{ opacity: 0, x:  -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: isRegister ? -20 : 20 }}
+                exit={{ opacity: 0, x:  20 }}
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                {isRegister ? (
-                  <SignUpForm onToggle={() => setIsRegister(false)} />
-                ) : (
-                  <LoginForm onToggle={() => setIsRegister(true)} />
-                )}
+                { 
+                  <LoginForm />
+                }
               </motion.div>
             </AnimatePresence>
           </div>
@@ -122,4 +112,4 @@ const Auth = () => {
   );
 };
 
-export default Auth;
+export default LoginPage;

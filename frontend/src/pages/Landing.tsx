@@ -66,8 +66,8 @@ const Landing = () => {
           </Link>
 
           <div className="flex items-center gap-6">
-            <Link to="/auth" className="text-sm font-medium text-slate-400 hover:text-white transition-colors hidden sm:block">Sign In</Link>
-            <Link to="/auth?register=true" className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:shadow-[0_0_20px_-5px_rgba(59,130,246,0.6)] hover:scale-[1.02] active:scale-95 transition-all">
+            <Link to="/login" className="text-sm font-medium text-slate-400 hover:text-white transition-colors hidden sm:block">Sign In</Link>
+            <Link to="/signup" className="px-5 py-2.5 bg-primary text-primary-foreground rounded-xl text-sm font-bold hover:shadow-[0_0_20px_-5px_rgba(59,130,246,0.6)] hover:scale-[1.02] active:scale-95 transition-all">
               Get Started
             </Link>
           </div>
@@ -88,10 +88,10 @@ const Landing = () => {
             A modern encrypted password vault built for privacy-first users. Zero-knowledge architecture. Client-side secure. Zero compromise.
           </p>
           <div className="flex flex-col sm:flex-row gap-4">
-            <Link to="/auth?register=true" className="px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-bold flex items-center justify-center gap-2 hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.5)] transition-all">
+            <Link to="/signup" className="px-8 py-4 bg-primary text-primary-foreground rounded-2xl font-bold flex items-center justify-center gap-2 hover:shadow-[0_0_30px_-5px_rgba(59,130,246,0.5)] transition-all">
               Initialize Vault <ArrowRight className="w-5 h-5" />
             </Link>
-            <Link to="/dashboard" className="px-8 py-4 bg-slate-900/50 border border-slate-800 rounded-2xl font-bold hover:bg-slate-800/80 transition-all">Live Demo</Link>
+            <Link to="/" className="px-8 py-4 bg-slate-900/50 border border-slate-800 rounded-2xl font-bold hover:bg-slate-800/80 transition-all">Live Demo</Link>
           </div>
         </motion.div>
 

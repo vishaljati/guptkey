@@ -7,13 +7,9 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 
-
 import api from "@/lib/axios";
 
-const navigate = useNavigate()
-
-
-const LoginForm = ({ onToggle }: { onToggle: () => void }) => {
+const LoginForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -96,9 +92,18 @@ const LoginForm = ({ onToggle }: { onToggle: () => void }) => {
 
             <div className="text-center pt-4 border-t border-slate-800/50">
                 <p className="text-sm text-slate-500">
-                    New to GuptKey? <button onClick={onToggle} className="text-primary font-bold hover:underline">Create a new vault</button>
+                    New to GuptKey?
+
+                    <Link to="/signup">
+                        <button className="text-primary font-bold hover:underline">
+                            Create a new vault
+                        </button>
+                    </Link>
+
                 </p>
             </div>
         </div>
     );
 };
+
+export default LoginForm;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useSearchParams ,useNavigate} from "react-router-dom";
+import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import {
   KeyRound, Eye, EyeOff, Loader2, ShieldCheck,
   Lock, User, Mail, ArrowRight, Fingerprint
@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
 import api from "@/lib/axios";
 
-const navigate=useNavigate()
 
 const getStrength = (pw: string) => {
   let score = 0;
@@ -24,7 +23,7 @@ const getStrength = (pw: string) => {
   return { label: "Very Strong", pct: 100, color: "bg-primary" };
 };
 
-const SignUpForm = ({ onToggle }: { onToggle: () => void }) => {
+const SignUpForm = () => {
   const [formData, setFormData] = useState({ name: "", email: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,11 +37,11 @@ const SignUpForm = ({ onToggle }: { onToggle: () => void }) => {
 
     try {
 
-      const registerUser=await api.post("/auth/signup",
+      const registerUser = await api.post("/auth/signup",
         {
-          name:formData.name,
-          email:formData.email,
-          password:formData.password
+          name: formData.name,
+          email: formData.email,
+          password: formData.password
         }
       )
       if (!registerUser) {
@@ -50,7 +49,7 @@ const SignUpForm = ({ onToggle }: { onToggle: () => void }) => {
         throw new Error("Backend for registration failed")
       }
 
-       navigate("/auth");
+      window.location.href="/login"
 
     } catch (error: any) {
       toast({
@@ -151,9 +150,16 @@ const SignUpForm = ({ onToggle }: { onToggle: () => void }) => {
 
       <div className="text-center pt-4 border-t border-slate-800/50">
         <p className="text-sm text-slate-500">
-          Already a member? <button onClick={onToggle} className="text-primary font-bold hover:underline">Sign in instead</button>
+          Already a member?
+          <Link to="/login">
+            <button className="text-primary font-bold hover:underline">
+              Log in instead
+            </button>
+          </Link>
         </p>
       </div>
     </div>
   );
 };
+
+export default SignUpForm;
