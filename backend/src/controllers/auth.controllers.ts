@@ -72,7 +72,7 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
             iv,
             salt
         })
-        
+
         if (!createdEncryptedPasswordVault) {
             throw new ApiError(500, "Encrypted password vault creation failed in DB")
         }
@@ -110,23 +110,37 @@ const loginUser = AsyncHandler(async (req: Request, res: Response) => {
             throw new ApiError(401, "Invalid password")
         }
         const userId = user._id
+
+        const userEncryptedPasswordVault = await EncryptedPassword.findOne({ userId: userId }).select("-__v -createdAt -updatedAt -userId")
+
+        if (!userEncryptedPasswordVault) {
+            throw new ApiError(404, "Encrypted password vault not found for the user")
+        }
         const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(userId);
 
         if (!accessToken || !refreshToken) {
             throw new ApiError(500, "ACCESS & REFRESH TOKEN GENERATION FAILED")
         }
 
-        const loggedInUser = await User.findById(userId).select("-password ")
+        const loggedInUser = await User.findById(userId).select("-password -refreshToken")
 
         const options = {
             httpOnly: true,
             secure: true
         }
 
+        const responseData = {
+            name: loggedInUser?.name,
+            email: loggedInUser?.email,
+            encryptedData: userEncryptedPasswordVault.encryptedData,
+            iv: userEncryptedPasswordVault.iv,
+            salt: userEncryptedPasswordVault.salt
+        }
+
         return res.status(200)
             .cookie("accessToken", accessToken, options)
             .cookie("refreshToken", refreshToken, options)
-            .json(new ApiResponse(200, "User logged in successfully", loggedInUser))
+            .json(new ApiResponse(200, "User logged in successfully", responseData))
 
 
     } catch (error) {
