@@ -1,15 +1,8 @@
 import { useState } from "react";
 import { Copy, Edit2, Trash2, Star, Eye, EyeOff, Globe } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import {PasswordEntry} from "@/types/password.types"
 
-interface PasswordEntry {
-  id: string;
-  site: string;
-  username: string;
-  password: string;
-  isFavorite: boolean;
-  url?: string;
-}
 
 interface PasswordCardProps {
   entry: PasswordEntry;
@@ -17,6 +10,7 @@ interface PasswordCardProps {
   onDelete: (id: string) => void;
   onToggleFavorite: (id: string) => void;
 }
+
 
 const PasswordCard = ({ entry, onEdit, onDelete, onToggleFavorite }: PasswordCardProps) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -33,14 +27,15 @@ const PasswordCard = ({ entry, onEdit, onDelete, onToggleFavorite }: PasswordCar
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary font-semibold text-sm shrink-0">
-            {entry.url ? <Globe className="w-4 h-4" /> : getInitials(entry.site)}
+            {getInitials(entry.site)}
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-semibold text-foreground truncate">{entry.site}</h3>
-            <p className="text-xs text-muted-foreground truncate">{entry.username}</p>
+            <p className="text-xs text-muted-foreground truncate">{entry.usernameOrEmail}</p>
           </div>
         </div>
         <button
+          title="favourite"
           onClick={() => onToggleFavorite(entry.id)}
           className="text-muted-foreground hover:text-yellow-400 transition-colors"
         >

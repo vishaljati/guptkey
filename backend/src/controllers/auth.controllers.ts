@@ -130,8 +130,11 @@ const loginUser = AsyncHandler(async (req: Request, res: Response) => {
         }
 
         const responseData = {
-            name: loggedInUser?.name,
-            email: loggedInUser?.email,
+            userData: {
+                _id: loggedInUser?._id,
+                name: loggedInUser?.name,
+                email: loggedInUser?.email
+            },
             encryptedData: userEncryptedPasswordVault.encryptedData,
             iv: userEncryptedPasswordVault.iv,
             salt: userEncryptedPasswordVault.salt

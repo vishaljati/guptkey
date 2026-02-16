@@ -1,27 +1,73 @@
 import { useState } from "react";
-import { Link , useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
-    Eye, EyeOff, Loader2, 
+    Eye, EyeOff, Loader2,
     Lock, Mail, Fingerprint
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-
-
+import { useDispatch } from "react-redux";
+import { login } from "@/features/authSlicer";
+import { setVault } from "@/features/vaultSlicer";
+import { LoginUser } from "@/service/auth.api";
+import { deriveKey } from "@/crypto/deriveKey";
+import { decryptVault } from "@/crypto/decrypt";
+import { base64ToBuffer } from "@/crypto/utils";
 
 const LoginForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-    const navigate = useNavigate()
 
+    const navigate = useNavigate()
+    const dispatch = useDispatch()
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!email || !password) return;
-
+        if (!email || !password) {
+            toast({
+                title: "Email and Password required"
+            })
+            return;
+        }
         try {
             setLoading(true);
+            const response = await LoginUser({ email, password });
+            if (response.status !== 200) {
+                throw new Error(response?.data?.data?.message || "Login failed");
+            }
+            const {
+                userData,
+                encryptedData,
+                iv,
+                salt,
+            } = response.data.data;
+
+            //Convert salt from base64
+            const saltBytes = new Uint8Array(
+                base64ToBuffer(salt)
+            );
+            //Derive key
+            const key = await deriveKey(password, saltBytes);
+            //Decrypt vault
+            const vault = await decryptVault(
+                encryptedData,
+                iv,
+                key
+            );
+            dispatch(
+                login({
+                    isLoggedIn: true,
+                    userData: userData,
+                })
+            );
+            dispatch(setVault(vault));
+            setPassword("");
+            toast({
+                title: "Vault Unlocked",
+                description: "Welcome back",
+            });
             
+            navigate("/dashboard");
 
         } catch (error: any) {
             toast({

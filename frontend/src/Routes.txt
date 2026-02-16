@@ -10,3 +10,25 @@ PASSWORD ROUTES
 /api/v1/passvault/updatevault PATCH - Update password vault 
 /api/v1/passvault/deletevault DELETE - Delete a  password vault 
 
+vault={
+    
+    version: 1,
+    createdAt: now,
+    updatedAt: now,
+    entries: [ 
+      {
+        id: string;
+        site: string;
+        usernameOrEmail: string;
+        password: string;
+        notes?: string;
+        createdAt: number;
+        updatedAt: number;
+    }
+  ]
+}
+Dashboard data show :
+1.Take vault and user data from redux store
+2.Display the vaults in a list or grid format,
+  showing the site name and username/email
+Update Vault:

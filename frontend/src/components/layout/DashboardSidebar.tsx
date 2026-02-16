@@ -16,6 +16,7 @@ const DashboardSidebar = () => {
     <>
       {/* Mobile toggle */}
       <button
+        title="mobile"
         onClick={() => setMobileOpen(true)}
         className="fixed top-4 left-4 z-50 p-2 rounded-lg bg-card border border-border md:hidden"
       >
@@ -43,7 +44,7 @@ const DashboardSidebar = () => {
             </div>
             <span className="text-lg font-bold text-foreground tracking-tight">GuptKey</span>
           </Link>
-          <button onClick={() => setMobileOpen(false)} className="md:hidden text-muted-foreground hover:text-foreground">
+          <button title="mobile" onClick={() => setMobileOpen(false)} className="md:hidden text-muted-foreground hover:text-foreground">
             <X className="w-5 h-5" />
           </button>
         </div>

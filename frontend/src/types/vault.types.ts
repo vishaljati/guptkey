@@ -3,6 +3,7 @@ export interface VaultEntry {
   site: string;
   usernameOrEmail: string;
   password: string;
+  isFavorite: boolean;
   notes?: string;
   createdAt: number;
   updatedAt: number;

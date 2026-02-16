@@ -1,5 +1,4 @@
 import api from "@/lib/axios";
-
 import { LoginPayload, SignupPayload } from "@/types/auth.types";
 
 export const SignupUser = async (
@@ -11,6 +10,8 @@ export const SignupUser = async (
 
 export const LoginUser = async (payload: LoginPayload) => {
   const res = await api.post("/auth/login", payload);
+  console.log(res);
+  
   return res;
 };
 

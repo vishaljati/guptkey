@@ -39,8 +39,8 @@ const vaultSlice = createSlice({
         //Update entry
         updateEntry(state, action: PayloadAction<VaultEntry>) {
             if (!state.vault) return;
-
-            const index = state.vault.entries.findIndex(
+            let index = -1;
+            index = state.vault.entries.findIndex(
                 (e) => e.id === action.payload.id
             );
 

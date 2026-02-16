@@ -5,7 +5,7 @@ import type { PasswordEntry } from "./PasswordCard";
 interface AddEditModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (entry: Omit<PasswordEntry, "id" | "isFavorite"> & { id?: string }) => void;
+  onSave: (data: PasswordFormData, id?: string) => void;
   editEntry?: PasswordEntry | null;
 }
 
@@ -36,7 +36,7 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
   useEffect(() => {
     if (editEntry) {
       setSite(editEntry.site);
-      setUsername(editEntry.username);
+      setUsername(editEntry.usernameOrEmail);
       setPassword(editEntry.password);
     } else {
       setSite("");
@@ -52,7 +52,7 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
 
   const handleSave = () => {
     if (!site || !username || !password) return;
-    onSave({ id: editEntry?.id, site, username, password });
+    onSave({ id: editEntry?.id, site, usernameOrEmail, password });
     onClose();
   };
 
