@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit"
 import authReducer from "@/features/authSlicer"
+import vaultReducer from "@/features/vaultSlicer"
 
 export const store = configureStore({
   reducer: {
-    auth: authReducer
+    auth: authReducer,
+    vault: vaultReducer,
   }
 })
 
