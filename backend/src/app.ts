@@ -2,7 +2,7 @@ import express, { type Application, type Request, type Response } from "express"
 import cors from "cors";
 import cookieParser from "cookie-parser"
 import { apiLimiter } from "./middlewares/rateLimit.middlewares.js";
-
+import { errorHandler } from "./middlewares/error.middlewares.js";
 const app: Application = express();
 
 app.use(
@@ -31,4 +31,5 @@ import passwordVaultRouter from "./routes/passwordVault.routes.js"
 app.use("/api/v1/auth", authRouter)
 app.use("/api/v1/passvault", passwordVaultRouter)
 
+app.use(errorHandler);
 export default app;
