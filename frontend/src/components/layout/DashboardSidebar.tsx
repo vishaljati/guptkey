@@ -1,6 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Shield, Star, Settings, LogOut, Menu, X, KeyRound } from "lucide-react";
+import { Shield, Star, Settings, LogOut, Menu, X, KeyRound ,Loader2 } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { clearVault } from "@/features/vaultSlicer";
+import { logout } from "@/features/authSlicer";
+import { toast } from "@/hooks/use-toast";
+import { logoutUser } from "@/service/auth.api"
 
 const navItems = [
   { icon: Shield, label: "All Passwords", path: "/dashboard" },
@@ -9,8 +15,32 @@ const navItems = [
 ];
 
 const DashboardSidebar = () => {
+  const [loading,setLoading]=useState(false)
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
+
+  const dispatch=useDispatch()
+  const navigate=useNavigate()
+
+  const handelLogout=async()=>{
+    try {
+      setLoading(true)
+      await logoutUser()
+    } catch (error) {
+      console.error("Logout API failed:", error);
+    }finally{
+
+    dispatch(clearVault());
+    dispatch(logout(null));
+
+    navigate("/login", { replace: true });
+    toast({
+      title: "Logged out",
+      description: "Your vault has been locked.",
+    });
+    }
+    setLoading(false)
+  }
 
   return (
     <>
@@ -73,13 +103,16 @@ const DashboardSidebar = () => {
         </nav>
 
         <div className="p-3 border-t border-sidebar-border">
-          <Link
-            to="/"
+          {loading ?
+          <Loader2 className="w-5 h-5 animate-spin" />
+          :<button
+            title="logout"
+            onClick={handelLogout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive/80 hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
           >
-            <LogOut className="w-4 h-4" />
+           <LogOut className="w-4 h-4" />
             Logout
-          </Link>
+          </button>}
         </div>
       </aside>
     </>

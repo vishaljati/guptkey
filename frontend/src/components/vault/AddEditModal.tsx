@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { X, Eye, EyeOff, RefreshCw, Save } from "lucide-react";
-import type { PasswordEntry } from "./PasswordCard";
+import type { PasswordEntry , PasswordFormData } from "@/types/password.types";
 
 interface AddEditModalProps {
   isOpen: boolean;
@@ -25,7 +25,7 @@ const generatePassword = (length: number, options: { upper: boolean; lower: bool
 
 const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps) => {
   const [site, setSite] = useState("");
-  const [username, setUsername] = useState("");
+  const [usernameOrEmail, setUsernameOrEmail] = useState("");
   const [password, setPassword] = useState("");
   const [notes, setNotes] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -36,11 +36,11 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
   useEffect(() => {
     if (editEntry) {
       setSite(editEntry.site);
-      setUsername(editEntry.usernameOrEmail);
+      setUsernameOrEmail(editEntry.usernameOrEmail);
       setPassword(editEntry.password);
     } else {
       setSite("");
-      setUsername("");
+      setUsernameOrEmail("");
       setPassword("");
       setNotes("");
     }
@@ -51,8 +51,14 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
   }, [genLength, genOptions]);
 
   const handleSave = () => {
-    if (!site || !username || !password) return;
-    onSave({ id: editEntry?.id, site, usernameOrEmail, password });
+    if (!site || !usernameOrEmail || !password) return;
+    const id= editEntry?.id
+    const data={
+      site,
+      usernameOrEmail,
+      password
+    }
+    onSave(data,id);
     onClose();
   };
 
@@ -94,8 +100,8 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
             <input
               id="username"
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={usernameOrEmail}
+              onChange={(e) => setUsernameOrEmail(e.target.value)}
               placeholder="user@example.com"
               title="Username or email"
               aria-label="Username or email"
@@ -191,7 +197,7 @@ const AddEditModal = ({ isOpen, onClose, onSave, editEntry }: AddEditModalProps)
 
           <button
             onClick={handleSave}
-            disabled={!site || !username || !password}
+            disabled={!site || !usernameOrEmail || !password}
             className="w-full flex items-center justify-center gap-2 py-2.5 bg-primary text-primary-foreground rounded-lg text-sm font-semibold hover:bg-primary/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 hover:shadow-[0_0_20px_-5px_hsl(var(--primary)/0.4)]"
           >
             <Save className="w-4 h-4" />

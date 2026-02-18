@@ -3,7 +3,6 @@ export type PasswordFormData = {
   usernameOrEmail: string;
   password: string;
   notes?: string;
-  isFavorite: boolean;
 };
 
 export interface PasswordEntry {
