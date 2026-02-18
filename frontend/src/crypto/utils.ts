@@ -3,7 +3,7 @@ export const generateSalt = (): Uint8Array => {
 };
 
 
-export const bufferToBase64 = (buffer: ArrayBuffer): string => {
+export const bufferToBase64 = (buffer: ArrayBuffer|ArrayBufferLike): string => {
   const bytes = new Uint8Array(buffer);
   let binary = "";
   const chunkSize = 0x8000; // 32KB chunks to prevent stack overflow
