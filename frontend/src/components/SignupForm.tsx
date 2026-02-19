@@ -96,7 +96,6 @@ const SignUpForm = () => {
 
     } catch (error: any) {
       setLoading(false)
-      console.log(error);
       if (axios.isAxiosError(error)) {
         const message = error.response?.data?.message || "Something went wrong";
         toast({
