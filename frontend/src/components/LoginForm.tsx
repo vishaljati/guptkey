@@ -33,14 +33,28 @@ const LoginForm = () => {
             setLoading(true);
             const response = await LoginUser({ email, password });
             if (response.status !== 200) {
-                throw new Error(response?.data?.data?.message || "Login failed");
+                toast({
+                    title: "Login Failed",
+                    description: "Internal server error",
+                    variant: "destructive"
+                })
+                return;
             }
             const {
                 userData,
                 encryptedData,
                 iv,
                 salt,
-            } = response.data.data;
+            } = response.data?.data;
+
+            if (!userData || !encryptedData || !iv || !salt) {
+                toast({
+                    title: "Login Failed",
+                    description: "Internal server error",
+                    variant: "destructive"
+                })
+                return;
+            }
 
             //Convert salt from base64
             const saltBytes = new Uint8Array(
@@ -66,13 +80,14 @@ const LoginForm = () => {
                 title: "Vault Unlocked",
                 description: "Welcome back",
             });
-            
+
             navigate("/dashboard");
 
         } catch (error: any) {
             toast({
                 title: "Login Failed",
                 description: error.response?.data?.message || "Invalid credentials",
+                variant: "destructive"
             });
         } finally {
             setLoading(false);

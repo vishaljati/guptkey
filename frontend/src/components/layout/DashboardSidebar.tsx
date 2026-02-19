@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { clearVault } from "@/features/vaultSlicer";
 import { logout } from "@/features/authSlicer";
 import { toast } from "@/hooks/use-toast";
-import { logoutUser } from "@/service/auth.api"
+import { LogoutUser } from "@/service/auth.api"
 
 const navItems = [
   { icon: Shield, label: "All Passwords", path: "/dashboard" },
@@ -25,7 +25,7 @@ const DashboardSidebar = () => {
   const handelLogout=async()=>{
     try {
       setLoading(true)
-      await logoutUser()
+      await LogoutUser()
     } catch (error) {
       console.error("Logout API failed:", error);
     }finally{

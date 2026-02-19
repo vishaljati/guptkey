@@ -4,17 +4,15 @@ import { LoginPayload, SignupPayload } from "@/types/auth.types";
 export const SignupUser = async (
   payload: SignupPayload 
 )=> {
-  const res = await api.post("/auth/signup", payload,{ withCredentials: true });
-  return res;
+  return await api.post("/auth/signup", payload,{ withCredentials: true });
+  
 };
 
 export const LoginUser = async (payload: LoginPayload) => {
-  const res = await api.post("/auth/login", payload,{ withCredentials: true });
-  console.log(res);
-  
-  return res;
+  return await api.post("/auth/login", payload,{ withCredentials: true });
+
 };
 
-export const logoutUser = async () => {
-  await api.post("/auth/logout", {}, { withCredentials: true });
+export const LogoutUser = async () => {
+  return await api.post("/auth/logout", {}, { withCredentials: true });
 };
