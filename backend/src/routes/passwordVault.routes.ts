@@ -12,7 +12,7 @@ const router = Router();
 router.use(verifyUser)
 
 
-router.put("/update", updatePasswordVault)
+router.patch("/update", updatePasswordVault)
 router.get("/get", getPasswordVault)
 router.delete("/delete", deletePasswordVault)
 
