@@ -4,9 +4,10 @@ import { Search, Plus, User } from "lucide-react";
 interface DashboardHeaderProps {
   onSearch: (query: string) => void;
   onAddNew: () => void;
+  rightElement?: React.ReactNode;
 }
 
-const DashboardHeader = ({ onSearch, onAddNew }: DashboardHeaderProps) => {
+const DashboardHeader = ({ onSearch, onAddNew ,rightElement }: DashboardHeaderProps) => {
   const [searchValue, setSearchValue] = useState("");
 
   const handleSearch = (val: string) => {
@@ -28,6 +29,7 @@ const DashboardHeader = ({ onSearch, onAddNew }: DashboardHeaderProps) => {
       </div>
 
       <div className="flex items-center gap-3 ml-4">
+        {rightElement}
         <button
           onClick={onAddNew}
           className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-all duration-200 hover:shadow-[0_0_20px_-5px_hsl(var(--primary)/0.4)]"

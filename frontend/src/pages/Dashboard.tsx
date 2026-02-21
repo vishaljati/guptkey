@@ -18,7 +18,7 @@ import AddEditModal from "@/components/vault/AddEditModal";
 import DeleteConfirmModal from "@/components/vault/DeleteConfirmModal";
 import EmptyVault from "@/components/vault/EmptyVault";
 import { toast } from "@/hooks/use-toast";
-
+import { AnimatedSaveButton } from "@/components/AnimatedSaveButton"
 import type { PasswordEntry } from "@/types/password.types";
 import type { PasswordFormData } from "@/types/password.types";
 
@@ -142,6 +142,12 @@ const Dashboard = () => {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 },
   };
+  const handleGlobalSave = async ()=> {
+    //TODO : Bring the vault fron redux and encrypt it and send to backend   
+    toast ({
+      title:"Your vault is saved in our server"
+    })
+  };
 
   return (
     <div className="min-h-screen bg-[#020817] text-slate-50 flex">
@@ -156,6 +162,7 @@ const Dashboard = () => {
             setEditEntry(null);
             setModalOpen(true);
           }}
+          rightElement={<AnimatedSaveButton onSave={handleGlobalSave} />}
         />
 
         <main className="flex-1 p-6 lg:p-10 relative z-10">
