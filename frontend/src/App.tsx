@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import AuthLayout from "./components/layout/Authlayout";
+import Favorites from "./pages/Favorite"
 
 const App = () => (
   <TooltipProvider>
@@ -53,10 +54,10 @@ const App = () => (
         />
 
         <Route
-          path="/dashboard/*"
+          path="/dashboard/favorites"
           element={
             <AuthLayout authentication={true}>
-              <Dashboard />
+              <Favorites />
             </AuthLayout>
           }
         />
