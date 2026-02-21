@@ -63,7 +63,8 @@ const vaultSlice = createSlice({
     },
 });
 
-export const { setVault,
+export const { 
+    setVault,
     clearVault,
     addEntry,
     updateEntry,

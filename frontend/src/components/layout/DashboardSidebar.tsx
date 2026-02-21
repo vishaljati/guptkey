@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Shield, Star, Settings, LogOut, Menu, X, KeyRound ,Loader2 } from "lucide-react";
+import { Shield, Star, Settings, LogOut, Menu, X, KeyRound, Loader2 } from "lucide-react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { clearVault } from "@/features/vaultSlicer";
 import { logout } from "@/features/authSlicer";
 import { toast } from "@/hooks/use-toast";
 import { LogoutUser } from "@/service/auth.api"
+import { isAxiosError } from "axios"
 
 const navItems = [
   { icon: Shield, label: "All Passwords", path: "/dashboard" },
@@ -15,31 +16,47 @@ const navItems = [
 ];
 
 const DashboardSidebar = () => {
-  const [loading,setLoading]=useState(false)
+  const [loading, setLoading] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
 
-  const dispatch=useDispatch()
-  const navigate=useNavigate()
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
-  const handelLogout=async()=>{
+  const handelLogout = async () => {
     try {
       setLoading(true)
       await LogoutUser()
-    } catch (error) {
-      console.error("Logout API failed:", error);
-    }finally{
+      dispatch(logout(null));
+      dispatch(clearVault());
+      navigate("/login");
+      toast({
+        title: "Logged out Successfully",
+        description: "Your vault has been locked.",
+      });
 
-    dispatch(clearVault());
-    dispatch(logout(null));
+    } catch (error: any) {
 
-    navigate("/login", { replace: true });
-    toast({
-      title: "Logged out",
-      description: "Your vault has been locked.",
-    });
+      if (isAxiosError(error)) {
+        const message = error.response?.data?.message || "Something went wrong";
+        toast({
+          title: "Logout Failed",
+          description: message,
+          variant: "destructive",
+
+        });
+      } else {
+        toast({
+          title: "Logout Failed",
+          description: "Unexpected Error occured.Try again later.",
+          variant: "destructive",
+
+        });
+      }
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
+
   }
 
   return (
@@ -63,9 +80,8 @@ const DashboardSidebar = () => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300 md:translate-x-0 ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        className={`fixed top-0 left-0 z-50 h-full w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300 md:translate-x-0 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+          }`}
       >
         <div className="flex items-center justify-between p-6 border-b border-sidebar-border">
           <Link to="/" className="flex items-center gap-2.5">
@@ -81,7 +97,7 @@ const DashboardSidebar = () => {
 
         <nav className="flex-1 p-3 space-y-1">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path || 
+            const isActive = location.pathname === item.path ||
               (item.path === "/dashboard" && location.pathname.startsWith("/dashboard"));
             const Icon = item.icon;
             return (
@@ -89,11 +105,10 @@ const DashboardSidebar = () => {
                 key={item.path}
                 to={item.path}
                 onClick={() => setMobileOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isActive
-                    ? "bg-primary/10 text-primary"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                }`}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
+                  ? "bg-primary/10 text-primary"
+                  : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                  }`}
               >
                 <Icon className="w-4 h-4" />
                 {item.label}
@@ -104,15 +119,15 @@ const DashboardSidebar = () => {
 
         <div className="p-3 border-t border-sidebar-border">
           {loading ?
-          <Loader2 className="w-5 h-5 animate-spin" />
-          :<button
-            title="logout"
-            onClick={handelLogout}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive/80 hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
-          >
-           <LogOut className="w-4 h-4" />
-            Logout
-          </button>}
+            <Loader2 className="w-5 h-5 animate-spin" />
+            : <button
+              title="logout"
+              onClick={handelLogout}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive/80 hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
+            >
+              <LogOut className="w-4 h-4" />
+              Logout
+            </button>}
         </div>
       </aside>
     </>

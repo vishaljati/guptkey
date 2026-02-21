@@ -27,7 +27,6 @@ const Dashboard = () => {
   const dispatch = useDispatch();
 
   const vault = useSelector((state: RootState) => state.vault.vault);
-  if (!vault) return null;
   const passwords = vault?.entries ?? [];
 
   const [searchQuery, setSearchQuery] = useState("");
