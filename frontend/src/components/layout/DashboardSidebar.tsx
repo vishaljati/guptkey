@@ -99,8 +99,7 @@ const DashboardSidebar = () => {
 
         <nav className="flex-1 p-3 space-y-1">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path ||
-              (item.path === "/dashboard" && location.pathname.startsWith("/dashboard"));
+            const isActive = location.pathname === item.path
             const Icon = item.icon;
             return (
               <Link
