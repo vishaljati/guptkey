@@ -8,7 +8,6 @@ const VaultContext = createContext<VaultContextType | null>(null);
 
 export const VaultProvider = ({ children }: { children: React.ReactNode }) => {
   const keyRef = useRef<ArrayBuffer | null>(null);
-
   return (
     <VaultContext.Provider value={{ keyRef }}>
       {children}

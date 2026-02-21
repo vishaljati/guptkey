@@ -147,6 +147,7 @@ const Dashboard = () => {
     show: { opacity: 1, y: 0 },
   };
   const handleGlobalSave = async () => {
+    if (!isDirty) return;
     if (!keyRef.current) {
       console.error("Key not initialized");
       return;
@@ -158,10 +159,10 @@ const Dashboard = () => {
     try {
       await saveVaultGlobally(
         vault,
-        isDirty,
         keyRef.current
       );
-       dispatch(markClean());
+      
+      dispatch(markClean());
 
       toast({
         title: "Vault Synced",
@@ -201,7 +202,19 @@ const Dashboard = () => {
             setEditEntry(null);
             setModalOpen(true);
           }}
-          rightElement={<AnimatedSaveButton onSave={handleGlobalSave} />}
+          rightElement={
+            <AnimatePresence>
+              {isDirty && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                >
+                  <AnimatedSaveButton onSave={handleGlobalSave} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          }
         />
 
         <main className="flex-1 p-6 lg:p-10 relative z-10">

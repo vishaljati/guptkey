@@ -8,6 +8,7 @@ import { logout } from "@/features/authSlicer";
 import { toast } from "@/hooks/use-toast";
 import { LogoutUser } from "@/service/auth.api"
 import { isAxiosError } from "axios"
+import { useVaultContext } from "@/components/vault/vaultProvider";
 
 const navItems = [
   { icon: Shield, label: "All Passwords", path: "/dashboard" },
@@ -19,7 +20,7 @@ const DashboardSidebar = () => {
   const [loading, setLoading] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false);
   const location = useLocation();
-
+  const { keyRef } = useVaultContext();
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
@@ -27,6 +28,7 @@ const DashboardSidebar = () => {
     try {
       setLoading(true)
       await LogoutUser()
+      keyRef.current = null;
       dispatch(logout(null));
       dispatch(clearVault());
       navigate("/login");
