@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
 import {
@@ -5,12 +6,12 @@ import {
   updateEntry,
   deleteEntry,
 } from "@/features/vaultSlicer";
-
+import { useVaultContext } from "@/components/vault/vaultProvider";
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Plus, Shield, Star, Search, LayoutGrid, List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
+import { saveVaultGlobally } from "@/crypto/vaultService"
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
 import DashboardHeader from "@/components/layout/DashboardHeader";
 import PasswordCard from "@/components/vault/PasswordCard";
@@ -21,8 +22,9 @@ import { toast } from "@/hooks/use-toast";
 import { AnimatedSaveButton } from "@/components/AnimatedSaveButton"
 import type { PasswordEntry } from "@/types/password.types";
 import type { PasswordFormData } from "@/types/password.types";
-
+import { markClean } from "@/features/vaultSlicer";
 const Dashboard = () => {
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -33,6 +35,8 @@ const Dashboard = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editEntry, setEditEntry] = useState<PasswordEntry | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { keyRef } = useVaultContext();
+  const isDirty = useSelector((state: RootState) => state.vault.isDirty) as boolean;
 
 
   // 📊 Stats
@@ -57,7 +61,7 @@ const Dashboard = () => {
 
   const deleteSiteName = passwords.find((p) => p.id === deleteId)?.site ?? "";
 
-  // 💾 Save (Add / Update)
+  //Save (Add / Update)
   const handleSave = (data: PasswordFormData, id?: string) => {
     if (!vault) return;
     if (id) {
@@ -142,11 +146,46 @@ const Dashboard = () => {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 },
   };
-  const handleGlobalSave = async ()=> {
-    //TODO : Bring the vault fron redux and encrypt it and send to backend   
-    toast ({
-      title:"Your vault is saved in our server"
-    })
+  const handleGlobalSave = async () => {
+    if (!keyRef.current) {
+      console.error("Key not initialized");
+      return;
+    }
+
+    if (!vault) {
+      throw new Error("Vault is empty. Nothing to save..")
+    }
+    try {
+      await saveVaultGlobally(
+        vault,
+        isDirty,
+        keyRef.current
+      );
+       dispatch(markClean());
+
+      toast({
+        title: "Vault Synced",
+        description: "All changes saved securely.",
+      });
+
+    } catch (error: unknown) {
+      let message = "Failed to save vault";
+      if (axios.isAxiosError(error)) {
+        message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
+      toast({
+        title: "Save Failed",
+        description: message,
+        variant: "destructive",
+      });
+
+    }
   };
 
   return (

@@ -82,5 +82,5 @@ export const AnimatedSaveButton = ({ onSave }: SaveButtonProps) => {
         )}
       </AnimatePresence>
     </motion.button>
-  );
+  )
 };

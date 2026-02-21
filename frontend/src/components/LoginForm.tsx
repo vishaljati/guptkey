@@ -84,7 +84,7 @@ const LoginForm = () => {
                 description: "Welcome back",
             });
 
-            navigate("/dashboard");
+            navigate("/dashboard",{ replace: true });
 
         } catch (error: any) {
             toast({

@@ -4,11 +4,13 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 interface VaultState {
     vault: Vault | null;
     isUnlocked: boolean;
+    isDirty?: boolean; // Track if there are unsaved changes
 }
 
 const initialState: VaultState = {
     vault: null,
     isUnlocked: false,
+    isDirty: false,
 };
 
 const vaultSlice = createSlice({
@@ -20,12 +22,17 @@ const vaultSlice = createSlice({
         setVault(state, action: PayloadAction<Vault>) {
             state.vault = action.payload;
             state.isUnlocked = true;
+            state.isDirty = false;
         },
 
         //Lock vault (logout or manual lock)
         clearVault(state) {
             state.vault = null;
             state.isUnlocked = false;
+            state.isDirty = false;
+        },
+        markClean: (state) => {
+            state.isDirty = false;
         },
 
         //Add entry
@@ -33,6 +40,7 @@ const vaultSlice = createSlice({
             if (!state.vault) return;
 
             state.vault.entries.unshift(action.payload);
+            state.isDirty = true;
             state.vault.updatedAt = Date.now();
         },
 
@@ -47,6 +55,7 @@ const vaultSlice = createSlice({
             if (index !== -1) {
                 state.vault.entries[index] = action.payload;
                 state.vault.updatedAt = Date.now();
+                state.isDirty = true;
             }
         },
 
@@ -59,15 +68,18 @@ const vaultSlice = createSlice({
             );
 
             state.vault.updatedAt = Date.now();
+            state.isDirty = true;
         },
     },
 });
 
-export const { 
+export const {
     setVault,
     clearVault,
     addEntry,
     updateEntry,
-    deleteEntry } = vaultSlice.actions;
+    deleteEntry,
+    markClean
+ } = vaultSlice.actions;
 
 export default vaultSlice.reducer;
