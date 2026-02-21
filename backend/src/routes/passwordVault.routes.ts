@@ -12,8 +12,8 @@ const router = Router();
 router.use(verifyUser)
 
 
-router.patch("/updatevault", updatePasswordVault)
-router.get("/getvault", getPasswordVault)
-router.delete("/deletevault", deletePasswordVault)
+router.put("/update", updatePasswordVault)
+router.get("/get", getPasswordVault)
+router.delete("/delete", deletePasswordVault)
 
 export default router;

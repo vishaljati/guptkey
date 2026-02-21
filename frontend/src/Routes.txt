@@ -5,12 +5,12 @@ AUTH ROUTES
 /api/v1/auth/refresh POST - Refresh the authentication token
 
 PASSWORD ROUTES
-/api/v1/passvault/createvault POST - Create a new password vault
-/api/v1/passvault/getvault GET - Retrieve all password vaults for the authenticated user
-/api/v1/passvault/updatevault PATCH - Update password vault 
-/api/v1/passvault/deletevault DELETE - Delete a  password vault 
+/api/v1/vault/createvault POST - Create a new password vault
+/api/v1/vault/get GET - Retrieve all password vaults for the authenticated user
+/api/v1/vault/update PUT - Update password vault 
+/api/v1/vault/delete   DELETE - Delete a  password vault 
 
-vault={
+vault={ 
     
     version: 1,
     createdAt: now,
@@ -27,8 +27,3 @@ vault={
     }
   ]
 }
-Dashboard data show :
-1.Take vault and user data from redux store
-2.Display the vaults in a list or grid format,
-  showing the site name and username/email
-Update Vault:
