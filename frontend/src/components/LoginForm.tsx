@@ -12,13 +12,15 @@ import { LoginUser } from "@/service/auth.api";
 import { deriveKey } from "@/crypto/deriveKey";
 import { decryptVault } from "@/crypto/decrypt";
 import { base64ToBuffer } from "@/crypto/utils";
+import { useVaultContext } from "@/components/vault/vaultProvider.tsx";
+
 
 const LoginForm = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
-
+    const { keyRef } = useVaultContext();
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const handleLogin = async (e: React.FormEvent) => {
@@ -62,6 +64,7 @@ const LoginForm = () => {
             );
             //Derive key
             const key = await deriveKey(password, saltBytes);
+            keyRef.current = key;
             //Decrypt vault
             const vault = await decryptVault(
                 encryptedData,

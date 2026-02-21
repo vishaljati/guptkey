@@ -3,6 +3,7 @@ import App from "./App.tsx";
 import "./index.css";
 import { Provider } from "react-redux";
 import { store } from "@/store/store.ts"
+import { VaultProvider } from "@/components/vault/vaultProvider.tsx";
 
 function reportErrorToDOM(message: string) {
     try {
@@ -35,7 +36,9 @@ window.addEventListener("unhandledrejection", (e) => {
 try {
     createRoot(document.getElementById("root")!).render(
         <Provider store={store}>
-            <App />
+            <VaultProvider>
+                <App />
+            </VaultProvider>    
         </Provider>
     );
 } catch (err: any) {
