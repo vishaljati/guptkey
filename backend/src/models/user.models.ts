@@ -29,6 +29,12 @@ const userSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>, IUserMethod
     refreshToken: {
       type: String
     },
+    otp: {
+      type: String
+    },
+    otpExpiry: {
+      type: Date
+    }
   },
   {
     timestamps: true,
@@ -44,7 +50,7 @@ userSchema.pre("save", async function () {
 
 userSchema.methods.isPasswordCorrect = async function (
   password: string
-){
+) {
   if (!password) {
     throw new Error("PASSWORD IS REQUIRED IN BCRYPT")
   }
@@ -81,4 +87,4 @@ userSchema.methods.generateRefreshToken = function (): string {
 };
 
 
-export const User = model<IUser, Model<IUser, {}, IUserMethods>>("User",userSchema);
+export const User = model<IUser, Model<IUser, {}, IUserMethods>>("User", userSchema);
