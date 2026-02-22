@@ -4,7 +4,7 @@ import { User } from "../models/user.models.js";
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
 import { type RefreshTokenPayload } from "../types/jwt.types.js";
-import { EncryptedPassword } from "../models/passwordVault.model.js";
+import { EncryptedPassword } from "../models/vault.model.js";
 import { sendWelcomeEmail } from "../utils/sendEmail.js";
 
 const generateAccessAndRefreshTokens = async (userId: Types.ObjectId) => {

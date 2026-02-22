@@ -1,10 +1,10 @@
-import { EncryptedPassword } from '../models/passwordVault.model.js';
+import { EncryptedPassword } from '../models/vault.model.js';
 import { ApiError, AsyncHandler, ApiResponse } from "../utils/index.js";
 import { type Request, type Response } from 'express';
 import mongoose from 'mongoose';
 
 
-const getSaltfromDB=AsyncHandler(async (req: Request, res: Response) => {
+const getSaltfromDB = AsyncHandler(async (req: Request, res: Response) => {
     const userId = req.user._id;
     const passwordVault = await EncryptedPassword.findOne({ userId: new mongoose.Types.ObjectId(userId) });
     if (!passwordVault) {
@@ -20,7 +20,7 @@ const updatePasswordVault = AsyncHandler(async (req: Request, res: Response) => 
     const { encryptedData, iv } = req.body;
 
 
-    if (!encryptedData || !iv ) {
+    if (!encryptedData || !iv) {
         throw new ApiError(400, "Encyrpted data and iv are required")
     }
 
@@ -33,7 +33,7 @@ const updatePasswordVault = AsyncHandler(async (req: Request, res: Response) => 
                 $set: {
                     encryptedData,
                     iv,
-                
+
                 }
             },
             {

@@ -26,7 +26,7 @@ app.get("/", (req: Request, res: Response) => {
 });
 
 import authRouter from "./routes/auth.routes.js"
-import passwordVaultRouter from "./routes/passwordVault.routes.js"
+import passwordVaultRouter from "./routes/vault.routes.js"
 import userRouter from "./routes/user.routes.js"
 
 app.use("/api/v1/users", userRouter)

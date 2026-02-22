@@ -4,7 +4,7 @@ import {
     getPasswordVault,
     deletePasswordVault,
     getSaltfromDB
-} from '../controllers/passwordVault.controllers.js'
+} from '../controllers/vault.controllers.js'
 
 import { verifyUser } from "../middlewares/auth.middlewares.js"
 
