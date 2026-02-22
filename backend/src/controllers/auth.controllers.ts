@@ -49,12 +49,6 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
     const existedUser = await User.findOne({ email })
 
     if (existedUser) {
-        const existedEncryptedPassword = await EncryptedPassword.findOne({ userId: existedUser._id })
-        if (existedEncryptedPassword) {
-            throw new ApiError(409, "Email already exists with encrypted password vault")
-        }
-    }
-    if (existedUser) {
         throw new ApiError(409, "Email already exists")
     }
     await User.create({
@@ -78,7 +72,11 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
     }
 
 
-    await sendWelcomeEmail(createdUser.email, createdUser.name)
+    try {
+        await sendWelcomeEmail(createdUser.email, createdUser.name)
+    } catch (error) {
+        console.error("Welcome Email failed:", error)
+    }
 
     return res.status(201).json(
         new ApiResponse

@@ -1,96 +1,106 @@
 import { type Request, type Response } from "express"
 import { AsyncHandler, ApiError, ApiResponse, generateSecureOTP } from "../utils/index.js";
+import { Otp } from "../models/otp.models.js";
 import { User } from "../models/user.models.js";
 import { Types } from "mongoose";
 import crypto from "crypto";
 import { sendOTPEmail } from "../utils/sendEmail.js";
 
 const requestPasswordReset = AsyncHandler(
-    async (req: Request, res: Response) => {
-        const { oldPassword } = req.body;
-        const userId = req.user._id;
-
-        if (!Types.ObjectId.isValid(userId)) {
-            throw new ApiError(400, "Invalid user ID");
-        }
-
-        if (!oldPassword) {
-            throw new ApiError(400, "Current password is required");
-        }
-
-        const user = await User.findById(userId).select("+password");
-        if (!user) {
-            throw new ApiError(404, "User not found");
-        }
-        const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
-
-        if (!isPasswordCorrect) {
-            throw new ApiError(400, "Current password is incorrect");
-        }
-
-        const otp = generateSecureOTP();
-
-        // Hash OTP before storing
-        const hashedOtp = crypto
-            .createHash("sha256")
-            .update(otp)
-            .digest("hex");
-
-        user.otp = hashedOtp;
-        user.otpExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
-
-        await user.save();
-        const email=user.email;
-        await sendOTPEmail(email, otp);
-
-        return res.status(200).json(new ApiResponse(200,"OTP sent to your email"));
-    }
-);
-
-const changePasswordWithOtp = AsyncHandler(
   async (req: Request, res: Response) => {
-    const { otp, newPassword } = req.body;
+    const { oldPassword } = req.body;
+    const userId = req.user._id;
 
-    if (!otp || !newPassword) {
-      throw new ApiError(400, "All fields are required");
-    }
-    const userId= req.user._id;
-
-    if (!Types.ObjectId.isValid(userId)) {
-      throw new ApiError(400, "Invalid user ID");
+    if (!oldPassword) {
+      throw new ApiError(400, "Current password required");
     }
 
-    const user = await User.findById(userId).select("+otp +otpExpiry +password");
+    const user = await User.findById(userId).select("+password");
+    if (!user) throw new ApiError(404, "User not found");
 
-    if (!user || !user.otp || !user.otpExpiry) {
-      throw new ApiError(400, "Invalid request");
+    const valid = await user.isPasswordCorrect(oldPassword);
+    if (!valid) throw new ApiError(400, "Invalid password");
+
+    // Prevent spam: only one active token
+    const existingToken = await Otp.findOne({ userId });
+    if (existingToken) {
+      throw new ApiError(429, "Reset already requested. Check email.");
     }
 
-    // Check expiry
-    if (user.otpExpiry < new Date()) {
-      throw new ApiError(400, "OTP expired");
-    }
+    const otp = generateSecureOTP();
 
-    // Hash provided OTP
     const hashedOtp = crypto
       .createHash("sha256")
       .update(otp)
       .digest("hex");
 
-    if (hashedOtp !== user.otp) {
-      throw new ApiError(400, "Invalid OTP");
+    // Send email first
+    await sendOTPEmail(user.email, otp);
+
+    await Otp.create({
+      userId,
+      hashedOtp,
+      expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+    });
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "OTP sent to your email"));
+  }
+);
+const changePasswordWithOtp = AsyncHandler(
+  async (req: Request, res: Response) => {
+    const { otp, newPassword } = req.body;
+    const userId = req.user._id;
+
+    if (!otp || !newPassword) {
+      throw new ApiError(400, "All fields required");
     }
 
-    // Hash new password
-    user.password = newPassword;
+    if (newPassword.length < 8) {
+      throw new ApiError(400, "Password must be at least 8 characters");
+    }
 
-    // Clear OTP
-    user.otp = undefined;
-    user.otpExpiry = undefined;
+    const resetToken = await Otp.findOne({ userId });
+
+    if (!resetToken || resetToken.expiresAt < new Date()) {
+      throw new ApiError(400, "Invalid or expired OTP");
+    }
+
+    if (resetToken.attempts >= 5) {
+      await resetToken.deleteOne();
+      throw new ApiError(429, "Too many failed attempts.Try again later");
+    }
+
+    const hashedOtp = crypto
+      .createHash("sha256")
+      .update(otp)
+      .digest("hex");
+
+    const isValid = crypto.timingSafeEqual(
+      Buffer.from(hashedOtp),
+      Buffer.from(resetToken.hashedOtp)
+    );
+
+    if (!isValid) {
+      resetToken.attempts += 1;
+      await resetToken.save();
+      throw new ApiError(400, "Invalid or expired OTP");
+    }
+
+    const user = await User.findById(userId);
+    if (!user) throw new ApiError(404, "User not found");
+
+    user.password = newPassword;
+    user.refreshToken = undefined; // force logout all sessions
 
     await user.save();
 
-    res.status(200).json(new ApiResponse(200, "Password changed successfully"));
+    await resetToken.deleteOne();
+
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Password changed successfully"));
   }
 );
 export {
