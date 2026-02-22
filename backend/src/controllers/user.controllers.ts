@@ -103,7 +103,17 @@ const changePasswordWithOtp = AsyncHandler(
       .json(new ApiResponse(200, "Password changed successfully"));
   }
 );
+const getUserProfile = AsyncHandler(async (req: Request, res: Response) => {
+    const userId = req.user._id;
+    const user = await User.findById(userId).select("-password -refreshToken -__v");   
+    if (!user) {
+        throw new ApiError(404, "User not found")
+    }
+    return res.status(200).json(new ApiResponse(200, "User profile fetched successfully", user))
+})
+
 export {
     requestPasswordReset,
-    changePasswordWithOtp
+    changePasswordWithOtp,
+    getUserProfile
 };

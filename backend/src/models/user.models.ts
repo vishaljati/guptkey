@@ -29,12 +29,6 @@ const userSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>, IUserMethod
     refreshToken: {
       type: String
     },
-    otp: {
-      type: String
-    },
-    otpExpiry: {
-      type: Date
-    }
   },
   {
     timestamps: true,

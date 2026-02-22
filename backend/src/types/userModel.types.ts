@@ -7,8 +7,6 @@ export interface IUser {
   password: string;
   isVerified: boolean;
   refreshToken?: string;
-  otp?: string;
-  otpExpiry?: Date;
   createdAt: Date;
   updatedAt: Date;
 
