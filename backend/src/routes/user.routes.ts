@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   requestPasswordReset,
   changePasswordWithOtp,
+  getUserProfile
 } from "../controllers/user.controllers.js";
 import { verifyUser } from "../middlewares/auth.middlewares.js";
 
@@ -10,5 +11,6 @@ router.use(verifyUser)
 
 router.patch("/password/reset-request",requestPasswordReset);
 router.patch("/password/reset",changePasswordWithOtp);
+router.get("/profile",getUserProfile);
 
 export default router;
