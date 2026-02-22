@@ -3,6 +3,7 @@ import { AsyncHandler, ApiError, ApiResponse, generateSecureOTP } from "../utils
 import { User } from "../models/user.models.js";
 import { Types } from "mongoose";
 import crypto from "crypto";
+import { sendOTPEmail } from "../utils/sendEmail.js";
 
 const requestPasswordReset = AsyncHandler(
     async (req: Request, res: Response) => {
@@ -40,7 +41,7 @@ const requestPasswordReset = AsyncHandler(
 
         await user.save();
         const email=user.email;
-        await sendOtpEmail(email, otp);
+        await sendOTPEmail(email, otp);
 
         return res.status(200).json(new ApiResponse(200,"OTP sent to your email"));
     }
