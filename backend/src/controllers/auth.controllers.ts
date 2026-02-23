@@ -118,10 +118,11 @@ const loginUser = AsyncHandler(async (req: Request, res: Response) => {
 
     const loggedInUser = await User.findById(userId).select("-password -refreshToken")
 
-    const options = {
+    const cookieOptions = {
         httpOnly: true,
-        secure: true
-    }
+        secure: true,
+        sameSite: "none" as const
+    };
 
     const responseData = {
         userData: {
@@ -135,8 +136,8 @@ const loginUser = AsyncHandler(async (req: Request, res: Response) => {
     }
 
     return res.status(200)
-        .cookie("accessToken", accessToken, options)
-        .cookie("refreshToken", refreshToken, options)
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
         .json(new ApiResponse(200, "User logged in successfully", responseData))
 
 })
@@ -147,23 +148,22 @@ const logoutUser = AsyncHandler(async (req: Request, res: Response) => {
     await User.findByIdAndUpdate(
         userId,
         {
-            $set: {
-                refreshToken: undefined
-            }
+            $unset: { refreshToken: 1 }
         },
         {
             new: true
         }
 
     )
-    const options = {
+    const cookieOptions = {
         httpOnly: true,
-        secure: true
+        secure: true,
+        sameSite: "none" as const
     }
 
     return res.status(200)
-        .clearCookie("accessToken", options)
-        .clearCookie("refreshToken", options)
+        .clearCookie("accessToken", cookieOptions)
+        .clearCookie("refreshToken", cookieOptions)
         .json(new ApiResponse(
             200,
             "User Logged out"
@@ -200,17 +200,18 @@ const refreshAccessToken = AsyncHandler(async (req: Request, res: Response) => {
         throw new ApiError(401, "Refresh token is expired or used");
     }
 
-    const option = {
+    const cookieOptions = {
         httpOnly: true,
-        secure: true
-    }
+        secure: true,
+        sameSite: "none" as const
+    };
 
     const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
 
 
     return res.status(200)
-        .cookie("accessToken", accessToken, option)
-        .cookie("refreshToken", refreshToken, option)
+        .cookie("accessToken", accessToken, cookieOptions)
+        .cookie("refreshToken", refreshToken, cookieOptions)
         .json(
             new ApiResponse(
                 200,
