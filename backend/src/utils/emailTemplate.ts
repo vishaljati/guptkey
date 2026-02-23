@@ -200,3 +200,110 @@ export const otpTemplate = (
   </html>
   `;
 };
+export const passwordChangedTemplate = (
+  name: string,
+  time: string,
+) => {
+  return `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Password Changed - GuptKey</title>
+  </head>
+  <body style="margin:0; padding:0; background-color:#f3f4f6;">
+
+    <!-- Preheader -->
+    <div style="display:none; max-height:0; overflow:hidden; opacity:0;">
+      Your GuptKey master password was changed. If this wasn’t you, act immediately.
+    </div>
+
+    <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f3f4f6; padding:40px 0;">
+      <tr>
+        <td align="center">
+
+          <table width="600" cellpadding="0" cellspacing="0" border="0" style="background:#ffffff; border-radius:12px; font-family:Arial, sans-serif; overflow:hidden;">
+
+            <!-- Header -->
+            <tr>
+              <td style="background:#111827; padding:40px 20px; text-align:center;">
+                <h1 style="color:#ffffff; margin:0; font-size:26px;">
+                  GuptKey Security Alert
+                </h1>
+              </td>
+            </tr>
+
+            <!-- Body -->
+            <tr>
+              <td style="padding:40px 30px; color:#374151; font-size:15px; line-height:1.6;">
+
+                <p style="font-size:18px; margin-top:0;">
+                  Hi <strong>${name}</strong>,
+                </p>
+
+                <p>
+                  Your master password was successfully changed.
+                </p>
+
+                <!-- Info Box -->
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f9fafb; border:1px solid #e5e7eb; border-radius:8px; margin:20px 0;">
+                  <tr>
+                    <td style="padding:20px; font-size:14px; color:#111827;">
+                      <strong>Time:</strong> ${time}<br/>
+                    </td>
+                  </tr>
+                </table>
+
+                <p>
+                  If you made this change, no further action is required.
+                </p>
+
+                <p style="color:#b91c1c; font-weight:bold;">
+                  If this wasn’t you, secure your account immediately.
+                </p>
+
+                <!-- CTA -->
+                <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:25px 0;">
+                  <tr>
+                    <td align="center">
+                      <a href="https://yourdomain.com/login"
+                         style="background:#1e3a8a; color:#ffffff; padding:14px 28px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">
+                        Secure My Account
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+                <p style="margin-top:30px;">
+                  Stay secure,<br/>
+                  <strong>The GuptKey Team</strong>
+                </p>
+
+              </td>
+            </tr>
+
+            <!-- Divider -->
+            <tr>
+              <td>
+                <hr style="border:none; border-top:1px solid #e5e7eb;" />
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td align="center" style="padding:20px; font-size:12px; color:#9ca3af;">
+                © 2026 GuptKey. All rights reserved.<br/>
+                Built for security-first users.
+              </td>
+            </tr>
+
+          </table>
+
+        </td>
+      </tr>
+    </table>
+
+  </body>
+  </html>
+  `;
+};

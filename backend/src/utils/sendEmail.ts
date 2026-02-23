@@ -1,5 +1,9 @@
 import nodemailer, { SentMessageInfo } from "nodemailer";
-import { otpTemplate, welcomeTemplate } from "./emailTemplate.js";
+import {
+  otpTemplate,
+  welcomeTemplate,
+  passwordChangedTemplate
+} from "./emailTemplate.js";
 
 const createTransporter = () => {
   const { EMAIL_USER, EMAIL_PASS } = process.env;
@@ -42,4 +46,16 @@ export const sendOTPEmail = async (to: string, otp: string) => {
 
 export const sendWelcomeEmail = async (to: string, name: string) => {
   return sendMail(to, "Welcome to GuptKey!", welcomeTemplate(name));
+};
+
+export const sendPasswordChangeNotification = async (
+  to: string,
+  name: string,
+  time: string,
+) => {
+  return sendMail(
+    to,
+    "Your GuptKey Password Was Changed",
+    passwordChangedTemplate(name, time)
+  );
 };
