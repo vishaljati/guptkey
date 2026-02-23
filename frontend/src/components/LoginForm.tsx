@@ -13,7 +13,7 @@ import { deriveKey } from "@/crypto/deriveKey";
 import { decryptVault } from "@/crypto/decrypt";
 import { base64ToBuffer } from "@/crypto/utils";
 import { useVaultContext } from "@/components/vault/vaultProvider.tsx";
-
+import axios from "axios";
 
 const LoginForm = () => {
     const [email, setEmail] = useState("");
@@ -84,13 +84,23 @@ const LoginForm = () => {
                 description: "Welcome back",
             });
 
-            navigate("/dashboard",{ replace: true });
+            navigate("/dashboard", { replace: true });
 
         } catch (error: any) {
+            let message = "Invalid Credentials";
+            if (axios.isAxiosError(error)) {
+                message =
+                    error.response?.data?.message ||
+                    error.response?.data?.error ||
+                    error.message;
+            } else if (error instanceof Error) {
+                message = error.message;
+            }
+
             toast({
                 title: "Login Failed",
-                description: error.response?.data?.message || "Invalid credentials",
-                variant: "destructive"
+                description: message,
+                variant: "destructive",
             });
         } finally {
             setLoading(false);
