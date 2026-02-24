@@ -11,7 +11,7 @@ const app: Application = express();
 
 app.use(
   cors({
-    origin: process.env.REACT_CLIENT_URL || "http://localhost:8080",
+    origin: process.env.REACT_CLIENT_URL || "https://guptkey.vercel.app",
     credentials: true,
   })
 );

@@ -116,7 +116,6 @@ const changePasswordWithOtp = AsyncHandler(
     const cookieOptions = {
       httpOnly: true,
       secure: true,
-      sameSite: "none" as const,
     };
 
     return res
@@ -199,7 +198,6 @@ const confirmDeleteAccount = AsyncHandler(
     const cookieOptions = {
       httpOnly: true,
       secure: true,
-      sameSite: "none" as const,
     };
     return res
       .status(200)

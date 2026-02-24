@@ -121,7 +121,6 @@ const loginUser = AsyncHandler(async (req: Request, res: Response) => {
   const cookieOptions = {
     httpOnly: true,
     secure: true,
-    sameSite: "none" as const,
   };
 
   const responseData = {
@@ -154,7 +153,6 @@ const logoutUser = AsyncHandler(async (req: Request, res: Response) => {
   const cookieOptions = {
     httpOnly: true,
     secure: true,
-    sameSite: "none" as const,
   };
 
   return res
@@ -199,7 +197,7 @@ const refreshAccessToken = AsyncHandler(async (req: Request, res: Response) => {
   const cookieOptions = {
     httpOnly: true,
     secure: true,
-    sameSite: "none" as const,
+    
   };
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
