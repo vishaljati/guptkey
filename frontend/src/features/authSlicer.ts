@@ -19,10 +19,13 @@ const authSlicer = createSlice({
              state.isLoggedIn=false
              state.name=null
              state.email=null
+        },
+        updateName: (state,action)=>{
+             state.name=action.payload.name
         }
     }
 })
 
-export const { login,logout }=authSlicer.actions;
+export const { login,logout,updateName }=authSlicer.actions;
 
 export default authSlicer.reducer;

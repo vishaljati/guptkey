@@ -21,6 +21,9 @@ import { deriveKey } from "@/crypto/deriveKey";
 import { encryptVault } from "@/crypto/encrypt";
 import { useVaultContext } from "@/components/vault/vaultProvider";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
+import { User } from "lucide-react";
+import { updateName } from "@/features/authSlicer";
+import { updateUserProfileApi } from "@/service/user.api";
 
 const SettingsPage = () => {
   useSessionTimeout()
@@ -31,6 +34,11 @@ const SettingsPage = () => {
   const [deletionStep, setDeletionStep] = useState<"idle" | "otp-sent">("idle");
   const [loadingforPassChange, setLoadingforPassChange] = useState(false);
   const [loadingforAccDel, setloadingforAccDel] = useState(false);
+
+  const NameOfUser = useSelector((state: RootState) => state.auth.name);
+  const EmailOfUser = useSelector((state: RootState) => state.auth.email);
+  const [name, setName] = useState(NameOfUser || "");
+  const [loadingProfile, setLoadingProfile] = useState(false);
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { keyRef } = useVaultContext();
@@ -235,6 +243,42 @@ const SettingsPage = () => {
       description: `Session timeout set to ${value} minutes.`,
     });
   };
+  //Update Profile
+  const handleUpdateName = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!name.trim()) return;
+
+    try {
+      setLoadingProfile(true);
+
+      const res = await updateUserProfileApi({ name });
+
+      const updatedUser = res.data.data;
+
+      // Update Redux
+      dispatch(
+        updateName({
+          name: updatedUser.name,
+        })
+      );
+
+      toast({
+        title: "Profile Updated",
+        description: "Your name has been updated successfully.",
+      });
+
+    } catch (error: any) {
+      toast({
+        title: "Update Failed",
+        description:
+          error.response?.data?.message || "Something went wrong.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoadingProfile(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -248,6 +292,45 @@ const SettingsPage = () => {
         </header>
 
         <main className="p-6 max-w-2xl space-y-6 animate-in-up">
+          {/* Profile Section */}
+          <div className="glass-panel p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <User className="w-4 h-4 text-primary" />
+              <h2 className="text-base font-semibold text-foreground">Profile</h2>
+            </div>
+
+            <form onSubmit={handleUpdateName} className="space-y-3">
+              <div>
+                <label className="text-xs text-muted-foreground">Name</label>
+                <input
+                  title="name"
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full mt-1 px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs text-muted-foreground">Email</label>
+                <input
+                  title="email"
+                  type="email"
+                  value={EmailOfUser||""}
+                  disabled
+                  className="w-full mt-1 px-3 py-2.5 bg-secondary/30 border border-border rounded-lg text-sm text-muted-foreground cursor-not-allowed"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loadingProfile}
+                className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition-all duration-200"
+              >
+                {loadingProfile ? "Updating..." : "Save Changes"}
+              </button>
+            </form>
+          </div>
           {/* Change master password */}
           <div className="glass-panel p-6">
             <div className="flex items-center gap-2 mb-4">

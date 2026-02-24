@@ -54,8 +54,18 @@ export const confirmDeleteAccountApi = async (otp: string) => {
 }
 export const cancelAccountDeletionApi = async () => {
   const res = await api.post(
-    "/users/delete/cancel", 
+    "/users/delete/cancel",
     {},
+    { withCredentials: true }
+  );
+  return res;
+}
+export const updateUserProfileApi = async (payload: {
+  name: string;
+}) => {
+  const res = await api.patch(
+    "/users/profile/update",
+    payload,
     { withCredentials: true }
   );
   return res;

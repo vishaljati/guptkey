@@ -215,12 +215,28 @@ const confirmDeleteAccount = AsyncHandler(async (req: Request, res: Response) =>
 })
 const cancelAccountDeletion = AsyncHandler(async (req: Request, res: Response) => {
   const userId = req.user._id;
-  const token = await Otp.findOne({ userId });  
+  const token = await Otp.findOne({ userId });
   if (!token) {
     throw new ApiError(404, "No pending deletion request found");
   }
   await token.deleteOne();
   return res.status(200).json(new ApiResponse(200, "Account deletion cancelled successfully"));
+})
+const updateProfile = AsyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user._id;
+  const { name } = req.body;
+  if (!name) {
+    throw new ApiError(400, "Name is required");
+  }
+  const user = await User.findById(userId);
+  if (!user) throw new ApiError(404, "User not found");
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { name },
+    { new: true, runValidators: true }
+  ).select("-password -refreshToken -__v");
+
+  return res.status(200).json(new ApiResponse(200, "Profile updated successfully", updatedUser));
 })
 
 
@@ -231,5 +247,6 @@ export {
   getUserProfile,
   requestOtpForDeleteAccount,
   confirmDeleteAccount,
-  cancelAccountDeletion
+  cancelAccountDeletion,
+  updateProfile 
 }

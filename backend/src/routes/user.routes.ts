@@ -5,7 +5,8 @@ import {
   getUserProfile,
   requestOtpForDeleteAccount,
   confirmDeleteAccount,
-  cancelAccountDeletion
+  cancelAccountDeletion,
+  updateProfile
 } from "../controllers/user.controllers.js";
 import { verifyUser } from "../middlewares/auth.middlewares.js";
 
@@ -18,5 +19,6 @@ router.get("/profile", getUserProfile);
 router.post("/delete/request", requestOtpForDeleteAccount);
 router.post("/delete/confirm", confirmDeleteAccount);
 router.post("/delete/cancel", cancelAccountDeletion);
+router.patch("/profile/update", updateProfile);
 
 export default router;
