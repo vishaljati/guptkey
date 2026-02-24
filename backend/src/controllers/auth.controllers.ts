@@ -124,12 +124,11 @@ const loginUser = AsyncHandler(async (req: Request, res: Response) => {
         sameSite: "none" as const
     };
 
-    const responseData = {
-        userData: {
-            _id: loggedInUser?._id,
-            name: loggedInUser?.name,
-            email: loggedInUser?.email
-        },
+    const responseData =
+    {
+
+        Name: loggedInUser?.name,
+        Email: loggedInUser?.email,
         encryptedData: userEncryptedPasswordVault.encryptedData,
         iv: userEncryptedPasswordVault.iv,
         salt: userEncryptedPasswordVault.salt

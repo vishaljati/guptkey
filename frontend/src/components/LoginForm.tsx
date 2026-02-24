@@ -34,22 +34,15 @@ const LoginForm = () => {
         try {
             setLoading(true);
             const response = await LoginUser({ email, password });
-            if (response.status !== 200) {
-                toast({
-                    title: "Login Failed",
-                    description: "Internal server error",
-                    variant: "destructive"
-                })
-                return;
-            }
             const {
-                userData,
+                Name,
+                Email,
                 encryptedData,
                 iv,
                 salt,
             } = response.data?.data;
 
-            if (!userData || !encryptedData || !iv || !salt) {
+            if (!Name || !Email || !encryptedData || !iv || !salt) {
                 toast({
                     title: "Login Failed",
                     description: "Internal server error",
@@ -74,7 +67,8 @@ const LoginForm = () => {
             dispatch(
                 login({
                     isLoggedIn: true,
-                    userData: userData,
+                    name: Name,
+                    email:Email
                 })
             );
             dispatch(setVault(vault));

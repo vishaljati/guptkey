@@ -13,32 +13,42 @@ export const AnimatedSaveButton = ({ onSave }: SaveButtonProps) => {
     if (status !== "idle") return;
     
     setStatus("loading");
-    await onSave();
-    setStatus("success");
-
-    // Reset back to idle after a delay
-    setTimeout(() => setStatus("idle"), 2000);
+    try {
+      await onSave();
+    } finally {
+      setStatus("success");
+      // Reset back to idle after a slightly longer delay for better UX
+      setTimeout(() => setStatus("idle"), 2500); 
+    }
   };
 
   return (
     <motion.button
       onClick={handlePress}
-      disabled={status === "loading"}
-      className="relative overflow-hidden group px-6 py-2.5 rounded-xl font-semibold text-sm flex items-center gap-2 transition-all"
+      disabled={status !== "idle"} // Disable interaction during both loading and success
+      className="relative overflow-hidden group w-full sm:w-auto min-w-[160px] flex justify-center items-center gap-2 px-6 py-3 sm:py-2.5 rounded-xl font-medium text-base sm:text-sm text-white border border-white/10 transition-all outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-900"
       initial={false}
       animate={{
-        backgroundColor: status === "success" ? "#10b981" : "#3b82f6",
-        scale: status === "loading" ? 0.95 : 1,
+        // Deep slate for idle, rich emerald for success
+        backgroundColor: status === "success" ? "#059669" : "#0f172a", 
+        // Dynamic glow based on state
+        boxShadow: status === "success" 
+          ? "0 8px 20px -4px rgba(5, 150, 105, 0.5)" 
+          : "0 8px 20px -4px rgba(15, 23, 42, 0.4)",
+        scale: status === "loading" ? 0.97 : 1,
       }}
-      whileHover={{ scale: 1.02 }}
-      whileTap={{ scale: 0.98 }}
+      whileHover={status === "idle" ? { scale: 1.02 } : {}}
+      whileTap={status === "idle" ? { scale: 0.96 } : {}}
     >
-      {/* Shimmer Effect (Attracts user) */}
+      {/* Subtle top inner highlight for a 3D glass effect */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/25 to-transparent opacity-50" />
+
+      {/* Premium Shimmer Effect */}
       {status === "idle" && (
         <motion.div
-          className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full"
-          animate={{ x: ["100%", "-100%"] }}
-          transition={{ repeat: Infinity, duration: 1.5, ease: "linear", repeatDelay: 3 }}
+          className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full"
+          animate={{ x: ["-100%", "200%"] }}
+          transition={{ repeat: Infinity, duration: 2.5, ease: "easeInOut", repeatDelay: 4 }}
         />
       )}
 
@@ -46,13 +56,14 @@ export const AnimatedSaveButton = ({ onSave }: SaveButtonProps) => {
         {status === "idle" && (
           <motion.div
             key="idle"
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex items-center gap-2 text-white"
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            className="flex items-center gap-2.5"
           >
-            <Save className="w-4 h-4" />
-            <span>Save Vault</span>
+            <Save className="w-5 h-5 sm:w-4 sm:h-4 text-slate-300 group-hover:text-white transition-colors duration-300" />
+            <span className="tracking-wide">Save Vault</span>
           </motion.div>
         )}
 
@@ -62,10 +73,11 @@ export const AnimatedSaveButton = ({ onSave }: SaveButtonProps) => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.8 }}
-            className="flex items-center gap-2 text-white"
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            className="flex items-center gap-2.5"
           >
-            <Loader2 className="w-4 h-4 animate-spin" />
-            <span>Syncing...</span>
+            <Loader2 className="w-5 h-5 sm:w-4 sm:h-4 animate-spin text-slate-300" />
+            <span className="tracking-wide text-slate-100">Syncing...</span>
           </motion.div>
         )}
 
@@ -74,13 +86,14 @@ export const AnimatedSaveButton = ({ onSave }: SaveButtonProps) => {
             key="success"
             initial={{ opacity: 0, scale: 0.5 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex items-center gap-2 text-white"
+            transition={{ type: "spring", stiffness: 400, damping: 25 }}
+            className="flex items-center gap-2.5"
           >
-            <Check className="w-4 h-4" />
-            <span>Changes Saved</span>
+            <Check className="w-5 h-5 sm:w-4 sm:h-4 text-white" />
+            <span className="tracking-wide font-semibold text-white">Saved Securely</span>
           </motion.div>
         )}
       </AnimatePresence>
     </motion.button>
-  )
+  );
 };
