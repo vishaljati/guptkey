@@ -23,8 +23,11 @@ import { AnimatedSaveButton } from "@/components/AnimatedSaveButton"
 import type { PasswordEntry } from "@/types/password.types";
 import type { PasswordFormData } from "@/types/password.types";
 import { markClean } from "@/features/vaultSlicer";
-const Dashboard = () => {
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 
+
+const Dashboard = () => {
+  useSessionTimeout()
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
