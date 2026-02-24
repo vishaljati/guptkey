@@ -36,3 +36,27 @@ export const getUserProfileApi = async () => {
   );
   return res;
 }
+export const requestOtpForDeleteAccountApi = async () => {
+  const res = await api.post(
+    "/users/delete/request",
+    {},
+    { withCredentials: true }
+  );
+  return res;
+}
+export const confirmDeleteAccountApi = async (otp: string) => {
+  const res = await api.post(
+    "/users/delete/confirm",
+    { otp },
+    { withCredentials: true }
+  );
+  return res;
+}
+export const cancelAccountDeletionApi = async () => {
+  const res = await api.post(
+    "/users/delete/cancel", 
+    {},
+    { withCredentials: true }
+  );
+  return res;
+}
