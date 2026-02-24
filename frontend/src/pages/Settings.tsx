@@ -7,7 +7,9 @@ import axios from "axios";
 import {
   requestPasswordResetApi,
   changePasswordWithOtpApi,
-  deleteAccountApi
+  requestOtpForDeleteAccountApi,
+  confirmDeleteAccountApi,
+  cancelAccountDeletionApi
 } from "@/service/user.api"
 import { useNavigate } from "react-router-dom";
 import { logout } from "@/features/authSlicer"
@@ -17,22 +19,26 @@ import { RootState } from "@/store/store";
 import { generateSalt, bufferToBase64 } from "@/crypto/utils";
 import { deriveKey } from "@/crypto/deriveKey";
 import { encryptVault } from "@/crypto/encrypt";
-
-
+import { useVaultContext } from "@/components/vault/vaultProvider";
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 
 const SettingsPage = () => {
+  useSessionTimeout()
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
   const [deletionStep, setDeletionStep] = useState<"idle" | "otp-sent">("idle");
   const [loading, setLoading] = useState(false);
-  const [timeout, setTimeoutVal] = useState("15");
   const navigate = useNavigate()
   const dispatch = useDispatch()
+  const { keyRef } = useVaultContext();
+  const [timeout, setTimeoutVal] = useState(
+    localStorage.getItem("sessionTimeout") || "15"
+  );
 
   const vault = useSelector((state: RootState) => state.vault.vault);
-
+  //Password Change
   const handleRequestOtpforPasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -90,6 +96,7 @@ const SettingsPage = () => {
         description: "Please login again.",
       });
       setNewPassword("")
+      keyRef.current = null
       dispatch(logout(null))
       dispatch(clearVault())
       navigate("/login")
@@ -113,17 +120,17 @@ const SettingsPage = () => {
       setLoading(false);
     }
   };
-  const deleteAccount = async () => {
-    setLoading(true)
+  //Account Deletion
+  const handleRequestOtpforAccountDeletion = async () => {
     try {
-      await deleteAccountApi()
+      setLoading(true);
+      await requestOtpForDeleteAccountApi()
       toast({
-        title: "Account deleted successfully",
-      })
-      dispatch(clearVault())
-      dispatch(logout(null))
-      navigate("/")
-    } catch (error) {
+        title: "OTP Sent",
+        description: "Check your email for verification code.",
+      });
+      setDeletionStep("otp-sent");
+    } catch (error: any) {
       let message = "Something went wrong";
       if (axios.isAxiosError(error)) {
         message =
@@ -133,30 +140,10 @@ const SettingsPage = () => {
       } else if (error instanceof Error) {
         message = error.message;
       }
+
       toast({
-        title: "Account deletion failed",
+        title: "Failed to sent OTP",
         description: message,
-        variant: "destructive",
-      });
-
-    }
-  }
-  const handleRequestOtpforAccountDeletion = async () => {
-    try {
-      setLoading(true);
-      //backend
-
-      toast({
-        title: "OTP Sent",
-        description: "Check your email for verification code.",
-      });
-
-      setDeletionStep("otp-sent");
-    } catch (error: any) {
-      toast({
-        title: "Failed to send OTP",
-        description:
-          error.response?.data?.message || "Something went wrong.",
         variant: "destructive",
       });
     } finally {
@@ -164,6 +151,7 @@ const SettingsPage = () => {
     }
   };
   const handleConfirmDelete = async () => {
+
     if (!otp) {
       toast({
         title: "OTP Required",
@@ -175,30 +163,77 @@ const SettingsPage = () => {
 
     try {
       setLoading(true);
-      //backend
+      await confirmDeleteAccountApi(otp)
       toast({
-        title: "Account Deleted",
+        title: "Account Deleted Successfully",
         description: "Your vault has been permanently removed.",
       });
 
       dispatch(logout(null));
       dispatch(clearVault());
+      keyRef.current = null
       navigate("/signup");
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      let message = "Something went wrong";
+      if (axios.isAxiosError(error)) {
+        message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
       toast({
-        title: "Deletion Failed",
-        description:
-          error.response?.data?.message || "Invalid or expired OTP.",
+        title: "Account Deletion Failed",
+        description: message,
         variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
-  const cancelDeleting=async ()=>{
-    setDeletionStep("idle")
+  const cancelDeleting = async () => {
+    setLoading(true)
+    try {
+      await cancelAccountDeletionApi()
+      setDeletionStep("idle")
+      toast({
+        title: "Account Deletion Cancelled"
+      })
+
+    } catch (error: unknown) {
+      let message = "Something went wrong";
+      if (axios.isAxiosError(error)) {
+        message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
+      toast({
+        title: "Account deletion cancellation failed!",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false)
+    }
+
   }
+  //Change timeout 
+  const handleTimeoutChange = (value: string) => {
+    setTimeoutVal(value);
+    localStorage.setItem("sessionTimeout", value);
+
+    toast({
+      title: "Saved",
+      description: `Session timeout set to ${value} minutes.`,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -271,11 +306,11 @@ const SettingsPage = () => {
             <div className="flex items-center gap-3">
               <select
                 value={timeout}
-                onChange={(e) => { setTimeoutVal(e.target.value); toast({ title: "Saved", description: `Session timeout set to ${e.target.value} minutes.` }); }}
+                onChange={(e) => handleTimeoutChange(e.target.value)}
                 className="px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
                 title="Select session timeout duration"
               >
-                <option value="5">5 minutes</option>
+                <option value="1">1 minutes</option>
                 <option value="15">15 minutes</option>
                 <option value="30">30 minutes</option>
                 <option value="60">1 hour</option>

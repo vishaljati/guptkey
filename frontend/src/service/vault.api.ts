@@ -11,3 +11,10 @@ export const saveVaultApi = async (payload: {
 
   return res;
 };
+
+export const getEncryptedVaultApi = async () => {
+  const res = await api.get("/vault/get", {
+    withCredentials: true,
+  });
+  return res;
+};

@@ -10,6 +10,7 @@ import SettingsPage from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import AuthLayout from "./components/layout/Authlayout";
 import Favorites from "./pages/Favorite"
+import UnlockPage from "./pages/UnlockPage"
 
 const App = () => (
   <TooltipProvider>
@@ -67,6 +68,14 @@ const App = () => (
           element={
             <AuthLayout authentication={true}>
               <SettingsPage />
+            </AuthLayout>
+          }
+        />
+        <Route
+          path="/unlock"
+          element={
+            <AuthLayout authentication={true}>
+              <UnlockPage/>
             </AuthLayout>
           }
         />

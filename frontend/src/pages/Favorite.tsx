@@ -5,7 +5,7 @@ import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { Star } from "lucide-react";
-
+import { useSessionTimeout } from "@/hooks/useSessionTimeout";
 import DashboardSidebar from "@/components/layout/DashboardSidebar";
 import PasswordCard from "@/components/vault/PasswordCard";
 import DeleteConfirmModal from "@/components/vault/DeleteConfirmModal";
@@ -13,9 +13,10 @@ import EmptyVault from "@/components/vault/EmptyVault";
 import { toast } from "@/hooks/use-toast";
 
 const Favorites = () => {
+  useSessionTimeout ()
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+ 
   const vault = useSelector((state: RootState) => state.vault.vault);
 
   if (!vault) {
