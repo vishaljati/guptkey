@@ -138,9 +138,24 @@ const getUserProfile = AsyncHandler(async (req: Request, res: Response) => {
   }
   return res.status(200).json(new ApiResponse(200, "User profile fetched successfully", user))
 })
+const deleteAccount = AsyncHandler(async (req: Request, res: Response) => {
+  const userId = req.user._id;
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new ApiError(404, "User not found")
+  }
+  const vault = await EncryptedPassword.findOne({ userId });
+  if (!vault) {
+    throw new ApiError(404, "Vault not found for user");
+  }
+  await vault.deleteOne();
+  await user.deleteOne();
+  return res.status(200).json(new ApiResponse(200, "Account deleted successfully"))
+})
 
 export {
   requestPasswordReset,
   changePasswordWithOtp,
-  getUserProfile
+  getUserProfile,
+  deleteAccount
 };

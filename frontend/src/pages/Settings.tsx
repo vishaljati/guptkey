@@ -6,7 +6,8 @@ import { toast } from "@/hooks/use-toast";
 import axios from "axios";
 import {
   requestPasswordResetApi,
-  changePasswordWithOtpApi
+  changePasswordWithOtpApi,
+  deleteAccountApi
 } from "@/service/user.api"
 import { useNavigate } from "react-router-dom";
 import { logout } from "@/features/authSlicer"
@@ -24,6 +25,7 @@ const SettingsPage = () => {
   const [newPassword, setNewPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
+  const [deletionStep, setDeletionStep] = useState<"idle" | "otp-sent">("idle");
   const [loading, setLoading] = useState(false);
   const [timeout, setTimeoutVal] = useState("15");
   const navigate = useNavigate()
@@ -31,7 +33,7 @@ const SettingsPage = () => {
 
   const vault = useSelector((state: RootState) => state.vault.vault);
 
-  const handleRequestOtp = async (e: React.FormEvent) => {
+  const handleRequestOtpforPasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
 
@@ -111,7 +113,92 @@ const SettingsPage = () => {
       setLoading(false);
     }
   };
+  const deleteAccount = async () => {
+    setLoading(true)
+    try {
+      await deleteAccountApi()
+      toast({
+        title: "Account deleted successfully",
+      })
+      dispatch(clearVault())
+      dispatch(logout(null))
+      navigate("/")
+    } catch (error) {
+      let message = "Something went wrong";
+      if (axios.isAxiosError(error)) {
+        message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+      toast({
+        title: "Account deletion failed",
+        description: message,
+        variant: "destructive",
+      });
 
+    }
+  }
+  const handleRequestOtpforAccountDeletion = async () => {
+    try {
+      setLoading(true);
+      //backend
+
+      toast({
+        title: "OTP Sent",
+        description: "Check your email for verification code.",
+      });
+
+      setDeletionStep("otp-sent");
+    } catch (error: any) {
+      toast({
+        title: "Failed to send OTP",
+        description:
+          error.response?.data?.message || "Something went wrong.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  const handleConfirmDelete = async () => {
+    if (!otp) {
+      toast({
+        title: "OTP Required",
+        description: "Enter the verification code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      setLoading(true);
+      //backend
+      toast({
+        title: "Account Deleted",
+        description: "Your vault has been permanently removed.",
+      });
+
+      dispatch(logout(null));
+      dispatch(clearVault());
+      navigate("/signup");
+
+    } catch (error: any) {
+      toast({
+        title: "Deletion Failed",
+        description:
+          error.response?.data?.message || "Invalid or expired OTP.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  const cancelDeleting=async ()=>{
+    setDeletionStep("idle")
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -132,7 +219,7 @@ const SettingsPage = () => {
               <h2 className="text-base font-semibold text-foreground">Change Master Password</h2>
             </div>
             {step === 1 &&
-              (<form onSubmit={handleRequestOtp} className="space-y-3">
+              (<form onSubmit={handleRequestOtpforPasswordChange} className="space-y-3">
                 <input
                   type="password"
                   value={oldPassword}
@@ -197,20 +284,6 @@ const SettingsPage = () => {
             </div>
           </div>
 
-          {/* Export */}
-          <div className="glass-panel p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <Download className="w-4 h-4 text-primary" />
-              <h2 className="text-base font-semibold text-foreground">Export Vault</h2>
-            </div>
-            <p className="text-sm text-muted-foreground mb-3">Download an encrypted backup of your vault data.</p>
-            <button
-              onClick={() => toast({ title: "Exporting...", description: "Your vault backup is being prepared." })}
-              className="px-5 py-2.5 bg-secondary text-secondary-foreground text-sm font-semibold rounded-lg hover:bg-secondary/80 transition-all duration-200 border border-border"
-            >
-              Export Vault
-            </button>
-          </div>
 
           {/* Danger zone */}
           <div className="glass-panel p-6 border-destructive/30">
@@ -221,12 +294,37 @@ const SettingsPage = () => {
             <p className="text-sm text-muted-foreground mb-3">
               Permanently delete your account and all vault data. This action is irreversible.
             </p>
-            <button
-              onClick={() => toast({ title: "Account deletion", description: "This feature requires confirmation via email.", variant: "destructive" })}
+            {deletionStep === "idle" && (<button
+              onClick={handleRequestOtpforAccountDeletion}
               className="px-5 py-2.5 bg-destructive/10 text-destructive text-sm font-semibold rounded-lg hover:bg-destructive/20 transition-all duration-200 border border-destructive/20"
             >
               Delete Account
-            </button>
+            </button>)}
+            {deletionStep === "otp-sent" && (
+              <form onSubmit={handleConfirmDelete} className="space-y-3">
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter OTP"
+                  className="w-full px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-5 py-2.5 bg-destructive/10 text-destructive text-sm font-semibold rounded-lg hover:bg-destructive/20 transition-all duration-200 border border-destructive/20"
+                >
+                  {loading ? "Deleting All data..." : "Confirm Delete"}
+                </button>
+                <button
+                  disabled={loading}
+                  onClick={cancelDeleting}
+                  className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition-all duration-200"
+                >
+                  {loading ? "Cancelling..." : "Cancel"}
+                </button>
+              </form>
+            )}
           </div>
         </main>
       </div>
