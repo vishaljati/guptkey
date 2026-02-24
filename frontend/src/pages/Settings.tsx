@@ -3,18 +3,115 @@ import DashboardSidebar from "@/components/layout/DashboardSidebar";
 import { Lock, Clock, Download, Trash2, ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import axios from "axios";
+import {
+  requestPasswordResetApi,
+  changePasswordWithOtpApi
+} from "@/service/user.api"
+import { useNavigate } from "react-router-dom";
+import { logout } from "@/features/authSlicer"
+import { clearVault } from "@/features/vaultSlicer"
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "@/store/store";
+import { generateSalt, bufferToBase64 } from "@/crypto/utils";
+import { deriveKey } from "@/crypto/deriveKey";
+import { encryptVault } from "@/crypto/encrypt";
+
+
 
 const SettingsPage = () => {
-  const [currentPw, setCurrentPw] = useState("");
-  const [newPw, setNewPw] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [step, setStep] = useState<1 | 2>(1);
+  const [loading, setLoading] = useState(false);
   const [timeout, setTimeoutVal] = useState("15");
+  const navigate = useNavigate()
+  const dispatch = useDispatch()
 
-  const handleChangePw = (e: React.FormEvent) => {
+  const vault = useSelector((state: RootState) => state.vault.vault);
+
+  const handleRequestOtp = async (e: React.FormEvent) => {
     e.preventDefault();
-    toast({ title: "Password updated", description: "Your master password has been changed." });
-    setCurrentPw("");
-    setNewPw("");
+    setLoading(true);
+
+    try {
+      await requestPasswordResetApi(oldPassword)
+      toast({
+        title: "OTP Sent",
+        description: "Check your email for the verification code.",
+      });
+
+      setStep(2);
+      setOldPassword("");
+    } catch (error: unknown) {
+      let message = "Otp sending failed";
+      if (axios.isAxiosError(error)) {
+        message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+
+      toast({
+        title: "OTP sending failed",
+        description: message,
+        variant: "destructive",
+      });
+
+    } finally {
+      setLoading(false);
+    }
   };
+  const handleConfirmChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+
+      if (!vault) throw new Error("Vault missing");
+      const salt = generateSalt();
+      const key = await deriveKey(newPassword, salt);
+      const { encryptedData, iv } = await encryptVault(vault, key);
+      await changePasswordWithOtpApi({
+        otp,
+        newPassword,
+        encryptedData,
+        iv,
+        salt: bufferToBase64(salt.buffer)
+      })
+
+      toast({
+        title: "Password Changed",
+        description: "Please login again.",
+      });
+      setNewPassword("")
+      dispatch(logout(null))
+      dispatch(clearVault())
+      navigate("/login")
+
+    } catch (error: any) {
+      let message = "Something went wrong";
+      if (axios.isAxiosError(error)) {
+        message =
+          error.response?.data?.message ||
+          error.response?.data?.error ||
+          error.message;
+      } else if (error instanceof Error) {
+        message = error.message;
+      }
+      toast({
+        title: "Password change failed",
+        description: message,
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -34,28 +131,48 @@ const SettingsPage = () => {
               <Lock className="w-4 h-4 text-primary" />
               <h2 className="text-base font-semibold text-foreground">Change Master Password</h2>
             </div>
-            <form onSubmit={handleChangePw} className="space-y-3">
-              <input
-                type="password"
-                value={currentPw}
-                onChange={(e) => setCurrentPw(e.target.value)}
-                placeholder="Current password"
-                className="w-full px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
-              />
-              <input
-                type="password"
-                value={newPw}
-                onChange={(e) => setNewPw(e.target.value)}
-                placeholder="New password"
-                className="w-full px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
-              />
-              <button
-                type="submit"
-                className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition-all duration-200"
-              >
-                Update Password
-              </button>
-            </form>
+            {step === 1 &&
+              (<form onSubmit={handleRequestOtp} className="space-y-3">
+                <input
+                  type="password"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                  placeholder="Current password"
+                  className="w-full px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition-all duration-200"
+                >
+                  {loading ? "Verifying..." : "Request OTP"}
+                </button>
+              </form>)}
+            {step === 2 &&
+              (<form onSubmit={handleConfirmChange} className="space-y-3">
+                <input
+                  type="text"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value)}
+                  placeholder="Enter OTP"
+                  className="w-full px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
+                />
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Enter New password"
+                  className="w-full px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
+                />
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition-all duration-200"
+                >
+                  {loading ? "Updating..." : "Confirm & Change Password"}
+                </button>
+              </form>)}
+
           </div>
 
           {/* Session timeout */}

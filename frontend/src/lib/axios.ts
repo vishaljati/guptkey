@@ -3,8 +3,6 @@ import { ENV } from "@/config/env-config";
 import { AxiosError , InternalAxiosRequestConfig} from "axios";
 
 
-
-
 // Create an Axios instance with default settings
 const api = axios.create({
   baseURL: ENV.API_BASE_URL,
@@ -15,20 +13,6 @@ const api = axios.create({
 });
 
 //Attachintg token to every request if exists
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("accessToken");
-
-    if (token && config.headers) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-//Handling 401 errors and refreshing token
 let isRefreshing = false;
 let failedQueue: {
   resolve: (value?: unknown) => void;
@@ -65,8 +49,9 @@ api.interceptors.response.use(
       requestURL.includes("/auth/register") ||
       requestURL.includes("/auth/refresh");
 
-
-    //HANDLE ACCESS TOKEN EXPIRE
+    // --------------------------------
+    // 🔐 Handle Access Token Expiry
+    // --------------------------------
     if (
       status === 401 &&
       !originalRequest._retry &&
@@ -74,7 +59,6 @@ api.interceptors.response.use(
     ) {
       originalRequest._retry = true;
 
-      // If refresh already running → queue request
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
           failedQueue.push({ resolve, reject });
@@ -84,8 +68,9 @@ api.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        await axios.post(
-          `${ENV.API_BASE_URL}/auth/refresh`,
+        // Attempt refresh (cookies automatically sent)
+        await api.post(
+          `/auth/refresh`,
           {},
           { withCredentials: true }
         );
@@ -95,7 +80,7 @@ api.interceptors.response.use(
       } catch (refreshError) {
         processQueue(refreshError);
 
-        // 🔥 Refresh failed → logout
+        // Refresh failed → force logout
         window.location.href = "/login";
         return Promise.reject(refreshError);
       } finally {
@@ -103,24 +88,23 @@ api.interceptors.response.use(
       }
     }
 
-  
-
-     //LOGIN / REGISTER FAILURE
+    // --------------------------------
+    // 🚫 Login/Register Failure
+    // --------------------------------
     if (status === 401 && isAuthRoute) {
       return Promise.reject(error);
     }
 
-
-     // REFRESH TOKEN EXPIRED
-
+    // --------------------------------
+    // 🔒 Refresh Token Expired
+    // --------------------------------
     if (status === 403) {
       window.location.href = "/login";
       return Promise.reject(error);
     }
 
-
-    //ALL OTHER ERRORS
     return Promise.reject(error);
   }
 );
+
 export default api;

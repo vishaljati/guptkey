@@ -2,9 +2,9 @@ import { type Request, type Response } from "express"
 import { AsyncHandler, ApiError, ApiResponse, generateSecureOTP } from "../utils/index.js";
 import { Otp } from "../models/otp.models.js";
 import { User } from "../models/user.models.js";
-import { Types } from "mongoose";
 import crypto from "crypto";
-import { sendOTPEmail } from "../utils/sendEmail.js";
+import { sendOTPEmail, sendPasswordChangeNotification } from "../utils/sendEmail.js";
+import { EncryptedPassword } from "../models/vault.model.js";
 
 const requestPasswordReset = AsyncHandler(
   async (req: Request, res: Response) => {
@@ -50,11 +50,19 @@ const requestPasswordReset = AsyncHandler(
 );
 const changePasswordWithOtp = AsyncHandler(
   async (req: Request, res: Response) => {
-    const { otp, newPassword } = req.body;
+    const { otp,
+      newPassword,
+      encryptedData,
+      iv,
+      salt } = req.body;
+
     const userId = req.user._id;
 
     if (!otp || !newPassword) {
-      throw new ApiError(400, "All fields required");
+      throw new ApiError(400, "OTP and new password required");
+    }
+    if (!encryptedData || !iv || !salt) {
+      throw new ApiError(400, "Vault data should be included in this request");
     }
 
     if (newPassword.length < 8) {
@@ -87,33 +95,52 @@ const changePasswordWithOtp = AsyncHandler(
       await resetToken.save();
       throw new ApiError(400, "Invalid or expired OTP");
     }
+    const vault = await EncryptedPassword.findOne({ userId })
+    if (!vault) {
+      throw new ApiError(404, "Vault not found for user");
+    }
+    vault.encryptedData = encryptedData;
+    vault.iv = iv;
+    vault.salt = salt;
+    await vault.save({ validateBeforeSave: true });
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).select("+password +refreshToken");
     if (!user) throw new ApiError(404, "User not found");
 
-    user.password = newPassword;
-    user.refreshToken = undefined; // force logout all sessions
-
-    await user.save();
+    user.password = newPassword
+    await user.save({ validateBeforeSave: false });
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $unset: { refreshToken: 1 },
+      },
+    );
 
     await resetToken.deleteOne();
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none" as const
+    };
 
     return res
       .status(200)
+      .clearCookie("accessToken", cookieOptions)
+      .clearCookie("refreshToken", cookieOptions)
       .json(new ApiResponse(200, "Password changed successfully"));
   }
 );
 const getUserProfile = AsyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user._id;
-    const user = await User.findById(userId).select("-password -refreshToken -__v");   
-    if (!user) {
-        throw new ApiError(404, "User not found")
-    }
-    return res.status(200).json(new ApiResponse(200, "User profile fetched successfully", user))
+  const userId = req.user._id;
+  const user = await User.findById(userId).select("-password -refreshToken -__v");
+  if (!user) {
+    throw new ApiError(404, "User not found")
+  }
+  return res.status(200).json(new ApiResponse(200, "User profile fetched successfully", user))
 })
 
 export {
-    requestPasswordReset,
-    changePasswordWithOtp,
-    getUserProfile
+  requestPasswordReset,
+  changePasswordWithOtp,
+  getUserProfile
 };

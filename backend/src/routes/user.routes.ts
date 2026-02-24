@@ -9,7 +9,7 @@ import { verifyUser } from "../middlewares/auth.middlewares.js";
 const router = Router();
 router.use(verifyUser)
 
-router.patch("/password/reset-request",requestPasswordReset);
+router.post("/password/reset-request",requestPasswordReset);
 router.patch("/password/reset",changePasswordWithOtp);
 router.get("/profile",getUserProfile);
 

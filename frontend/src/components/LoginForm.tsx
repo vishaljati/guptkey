@@ -87,6 +87,7 @@ const LoginForm = () => {
             navigate("/dashboard", { replace: true });
 
         } catch (error: any) {
+            console.log("Actual error:", error);
             let message = "Invalid Credentials";
             if (axios.isAxiosError(error)) {
                 message =

@@ -17,13 +17,17 @@ const updatePasswordVault = AsyncHandler(async (req: Request, res: Response) => 
 
     const userId = req.user._id;
 
-    const { encryptedData, iv } = req.body;
+    const { encryptedData, iv , salt } = req.body;
 
 
     if (!encryptedData || !iv) {
         throw new ApiError(400, "Encyrpted data and iv are required")
     }
-
+    const existingVault = await EncryptedPassword.findOne({ userId: new mongoose.Types.ObjectId(userId) });
+    if (!existingVault) {
+        throw new ApiError(404, "Password vault not found")
+    }
+    
     const updatedPasswordVault =
         await EncryptedPassword.findOneAndUpdate(
             {
@@ -33,6 +37,7 @@ const updatePasswordVault = AsyncHandler(async (req: Request, res: Response) => 
                 $set: {
                     encryptedData,
                     iv,
+                    salt: salt? salt : existingVault.salt
 
                 }
             },
@@ -41,7 +46,7 @@ const updatePasswordVault = AsyncHandler(async (req: Request, res: Response) => 
                 runValidators: true
             }
 
-        ).select("-salt -__v -userId");
+        ).select("-__v -userId");
     if (!updatedPasswordVault) {
         throw new ApiError(500, "Password vault updation failed")
     }

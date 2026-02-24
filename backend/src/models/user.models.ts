@@ -61,7 +61,7 @@ userSchema.methods.generateAccessToken = function (): string {
     } as AccessTokenPayload,
     process.env.ACCESS_TOKEN_SECRET as string,
     {
-      expiresIn: "30m",
+      expiresIn: "10m",
     }
   );
 };
@@ -75,7 +75,7 @@ userSchema.methods.generateRefreshToken = function (): string {
     } as RefreshTokenPayload,
     process.env.REFRESH_TOKEN_SECRET as string,
     {
-      expiresIn: "1h",
+      expiresIn: "30m",
     }
   );
 };

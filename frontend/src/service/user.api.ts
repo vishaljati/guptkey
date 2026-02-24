@@ -9,10 +9,16 @@ export const requestPasswordResetApi = async (oldPassword: string) => {
   return res.data;
 };
 
-export const changePasswordWithOtpApi = async (otp: string, newPassword: string) => {
+export const changePasswordWithOtpApi = async (payload:{
+  otp: string;
+  newPassword: string;
+  encryptedData: string;
+  iv: string;
+  salt: string;
+}) => {
   const res = await api.patch(
     "/users/password/reset",
-    { otp , newPassword },
+    payload,
     { withCredentials: true }
   );
   return res.data;
