@@ -5,7 +5,7 @@ import { logout } from "@/features/authSlicer"
 import { useNavigate } from "react-router-dom";
 import { useVaultContext } from "@/components/vault/vaultProvider";
 
-const DEFAULT_TIMEOUT_MINUTES = 15;
+const DEFAULT_TIMEOUT_MINUTES = 5;
 const STORAGE_KEY = "sessionTimeout";
 const FORCE_LOCK_KEY = "guptkey_force_lock";
 
