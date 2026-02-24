@@ -4,6 +4,6 @@ export interface ImportMetaEnv {
 
 export const ENV:ImportMetaEnv = {
 
-  API_BASE_URL: String(import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api/v1"),
+  API_BASE_URL: String(import.meta.env.VITE_API_BASE_URL || "https://guptkey.onrender.com/api/v1"),
 
 }
