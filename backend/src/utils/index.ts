@@ -3,9 +3,4 @@ import { ApiError } from "./ApiError.js";
 import { ApiResponse } from "./ApiResonse.js";
 import { generateSecureOTP } from "./generateSecureOTP.js";
 
-export {
-    AsyncHandler,
-    ApiError,
-    ApiResponse,
-    generateSecureOTP
-}
+export { AsyncHandler, ApiError, ApiResponse, generateSecureOTP };

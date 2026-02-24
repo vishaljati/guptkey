@@ -1,4 +1,4 @@
-import { type Request, type Response } from "express"
+import { type Request, type Response } from "express";
 import { AsyncHandler, ApiError, ApiResponse } from "../utils/index.js";
 import { User } from "../models/user.models.js";
 import jwt from "jsonwebtoken";
@@ -8,225 +8,220 @@ import { EncryptedPassword } from "../models/vault.model.js";
 import { sendWelcomeEmail } from "../utils/sendEmail.js";
 
 const generateAccessAndRefreshTokens = async (userId: Types.ObjectId) => {
-    try {
-        const user = await User.findById(userId)
-        if (!user) {
-            throw new ApiError(404, "User not found")
-        }
-        const accessToken = user.generateAccessToken()
-        const refreshToken = user.generateRefreshToken()
-        if (!accessToken || !refreshToken) {
-            throw new ApiError(500, "Access token or Refresh token generation failed")
-        }
-
-        user.refreshToken = refreshToken;
-        await user.save({ validateBeforeSave: false })
-        return {
-            accessToken,
-            refreshToken
-        }
-    } catch (error) {
-        console.log("ERROR :", error);
-        throw new ApiError(500, "Something went wrong while generating Access and Refresh Token")
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+    if (!accessToken || !refreshToken) {
+      throw new ApiError(
+        500,
+        "Access token or Refresh token generation failed"
+      );
     }
 
-
-}
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+    return {
+      accessToken,
+      refreshToken,
+    };
+  } catch (error) {
+    console.log("ERROR :", error);
+    throw new ApiError(
+      500,
+      "Something went wrong while generating Access and Refresh Token"
+    );
+  }
+};
 
 const registerUser = AsyncHandler(async (req: Request, res: Response) => {
+  const { name, email, password, encryptedData, iv, salt } = req.body;
+  if (!name || !email) {
+    throw new ApiError(400, "Name and Email is required");
+  }
+  if (!password) {
+    throw new ApiError(400, "Password is required");
+  }
+  if (!encryptedData || !iv || !salt) {
+    throw new ApiError(400, "Encrypted data, IV and salt are required");
+  }
 
-    const { name, email, password, encryptedData, iv, salt } = req.body
-    if (!name || !email) {
-        throw new ApiError(400, "Name and Email is required")
-    }
-    if (!password) {
-        throw new ApiError(400, "Password is required")
-    }
-    if (!encryptedData || !iv || !salt) {
-        throw new ApiError(400, "Encrypted data, IV and salt are required")
-    }
+  const existedUser = await User.findOne({ email });
 
-    const existedUser = await User.findOne({ email })
+  if (existedUser) {
+    throw new ApiError(409, "Email already exists");
+  }
+  await User.create({
+    name,
+    email,
+    password,
+  });
+  const createdUser = await User.findOne({ email }).select(
+    "-password -refreshToken -__v"
+  );
+  if (!createdUser) {
+    throw new ApiError(500, "User creation failed in DB");
+  }
+  const createdEncryptedPasswordVault = await EncryptedPassword.create({
+    userId: createdUser._id,
+    encryptedData,
+    iv,
+    salt,
+  });
 
-    if (existedUser) {
-        throw new ApiError(409, "Email already exists")
-    }
-    await User.create({
-        name,
-        email,
-        password,
-    })
-    const createdUser = await User.findOne({ email }).select("-password -refreshToken -__v")
-    if (!createdUser) {
-        throw new ApiError(500, "User creation failed in DB")
-    }
-    const createdEncryptedPasswordVault = await EncryptedPassword.create({
-        userId: createdUser._id,
-        encryptedData,
-        iv,
-        salt
-    })
+  if (!createdEncryptedPasswordVault) {
+    throw new ApiError(500, "Encrypted password vault creation failed in DB");
+  }
 
-    if (!createdEncryptedPasswordVault) {
-        throw new ApiError(500, "Encrypted password vault creation failed in DB")
-    }
+  try {
+    await sendWelcomeEmail(createdUser.email, createdUser.name);
+  } catch (error) {
+    console.error("Welcome Email failed:", error);
+  }
 
-
-    try {
-        await sendWelcomeEmail(createdUser.email, createdUser.name)
-    } catch (error) {
-        console.error("Welcome Email failed:", error)
-    }
-
-    return res.status(201).json(
-        new ApiResponse
-            (201, "User registered successfully", createdUser))
-
-})
+  return res
+    .status(201)
+    .json(new ApiResponse(201, "User registered successfully", createdUser));
+});
 
 const loginUser = AsyncHandler(async (req: Request, res: Response) => {
+  const { email, password } = req.body || {};
+  if (!email || !password) {
+    throw new ApiError(400, "Email and Password is required");
+  }
 
-    const { email, password } = req.body || {}
-    if (!email || !password) {
-        throw new ApiError(400, "Email and Password is required")
+  const user = await User.findOne({ email }).select("+password");
 
-    }
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
 
-    const user = await User.findOne({ email }).select("+password");
+  const isPasswordValid = await user.isPasswordCorrect(password);
 
-    if (!user) {
-        throw new ApiError(404, "User not found")
-    }
+  if (!isPasswordValid) {
+    throw new ApiError(401, "Invalid password");
+  }
+  const userId = user._id;
 
-    const isPasswordValid = await user.isPasswordCorrect(password)
+  const userEncryptedPasswordVault = await EncryptedPassword.findOne({
+    userId: userId,
+  }).select("-__v -createdAt -updatedAt -userId");
 
-    if (!isPasswordValid) {
-        throw new ApiError(401, "Invalid password")
-    }
-    const userId = user._id
+  if (!userEncryptedPasswordVault) {
+    throw new ApiError(404, "Encrypted password vault not found for the user");
+  }
+  const { accessToken, refreshToken } =
+    await generateAccessAndRefreshTokens(userId);
 
-    const userEncryptedPasswordVault = await EncryptedPassword.findOne({ userId: userId }).select("-__v -createdAt -updatedAt -userId")
+  if (!accessToken || !refreshToken) {
+    throw new ApiError(500, "ACCESS & REFRESH TOKEN GENERATION FAILED");
+  }
 
-    if (!userEncryptedPasswordVault) {
-        throw new ApiError(404, "Encrypted password vault not found for the user")
-    }
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(userId);
+  const loggedInUser = await User.findById(userId).select(
+    "-password -refreshToken"
+  );
 
-    if (!accessToken || !refreshToken) {
-        throw new ApiError(500, "ACCESS & REFRESH TOKEN GENERATION FAILED")
-    }
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none" as const,
+  };
 
-    const loggedInUser = await User.findById(userId).select("-password -refreshToken")
+  const responseData = {
+    Name: loggedInUser?.name,
+    Email: loggedInUser?.email,
+    encryptedData: userEncryptedPasswordVault.encryptedData,
+    iv: userEncryptedPasswordVault.iv,
+    salt: userEncryptedPasswordVault.salt,
+  };
 
-    const cookieOptions = {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none" as const
-    };
-
-    const responseData =
-    {
-
-        Name: loggedInUser?.name,
-        Email: loggedInUser?.email,
-        encryptedData: userEncryptedPasswordVault.encryptedData,
-        iv: userEncryptedPasswordVault.iv,
-        salt: userEncryptedPasswordVault.salt
-    }
-
-    return res.status(200)
-        .cookie("accessToken", accessToken, cookieOptions)
-        .cookie("refreshToken", refreshToken, cookieOptions)
-        .json(new ApiResponse(200, "User logged in successfully", responseData))
-
-})
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(new ApiResponse(200, "User logged in successfully", responseData));
+});
 
 const logoutUser = AsyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user._id
+  const userId = req.user._id;
 
-    await User.findByIdAndUpdate(
-        userId,
-        {
-            $unset: { refreshToken: 1 }
-        },
-        {
-            new: true
-        }
-
-    )
-    const cookieOptions = {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none" as const
+  await User.findByIdAndUpdate(
+    userId,
+    {
+      $unset: { refreshToken: 1 },
+    },
+    {
+      new: true,
     }
+  );
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none" as const,
+  };
 
-    return res.status(200)
-        .clearCookie("accessToken", cookieOptions)
-        .clearCookie("refreshToken", cookieOptions)
-        .json(new ApiResponse(
-            200,
-            "User Logged out"
-        ))
-
-})
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json(new ApiResponse(200, "User Logged out"));
+});
 
 const refreshAccessToken = AsyncHandler(async (req: Request, res: Response) => {
+  const cookies = req.cookies || {};
+  const body = req.body || {};
 
-    const cookies = req.cookies || {}
-    const body = req.body || {}
+  const incomingRefreshToken = cookies.refreshToken || body.refreshToken;
 
+  if (
+    !incomingRefreshToken ||
+    typeof incomingRefreshToken !== "string" ||
+    !incomingRefreshToken.trim()
+  ) {
+    throw new ApiError(
+      401,
+      "Unauthorized request: Refresh token missing or invalid"
+    );
+  }
 
-    const incomingRefreshToken = cookies.refreshToken || body.refreshToken;
+  const decodedToken = jwt.verify(
+    incomingRefreshToken,
+    process.env.REFRESH_TOKEN_SECRET as string
+  ) as RefreshTokenPayload;
 
+  const user = await User.findById(decodedToken._id);
 
-    if (!incomingRefreshToken || typeof incomingRefreshToken !== "string" || !incomingRefreshToken.trim()) {
-        throw new ApiError(401, "Unauthorized request: Refresh token missing or invalid");
-    }
+  if (!user) {
+    throw new ApiError(401, "Invalid refresh token");
+  }
 
+  if (incomingRefreshToken !== user?.refreshToken) {
+    throw new ApiError(401, "Refresh token is expired or used");
+  }
 
-    const decodedToken = jwt.verify(
-        incomingRefreshToken,
-        process.env.REFRESH_TOKEN_SECRET as string
-    ) as RefreshTokenPayload
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none" as const,
+  };
 
-    const user = await User.findById(decodedToken._id)
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
+    user._id
+  );
 
-    if (!user) {
-        throw new ApiError(401, "Invalid refresh token");
-    }
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(
+      new ApiResponse(200, "Access Token Refreshed Successfully", {
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+      })
+    );
+});
 
-    if (incomingRefreshToken !== user?.refreshToken) {
-        throw new ApiError(401, "Refresh token is expired or used");
-    }
-
-    const cookieOptions = {
-        httpOnly: true,
-        secure: true,
-        sameSite: "none" as const
-    };
-
-    const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id)
-
-
-    return res.status(200)
-        .cookie("accessToken", accessToken, cookieOptions)
-        .cookie("refreshToken", refreshToken, cookieOptions)
-        .json(
-            new ApiResponse(
-                200,
-                "Access Token Refreshed Successfully",
-                {
-                    accessToken: accessToken,
-                    refreshToken: refreshToken
-                },
-            )
-        )
-
-})
-
-export {
-    registerUser,
-    loginUser,
-    logoutUser,
-    refreshAccessToken
-}
+export { registerUser, loginUser, logoutUser, refreshAccessToken };

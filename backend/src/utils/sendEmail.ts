@@ -2,7 +2,7 @@ import nodemailer, { SentMessageInfo } from "nodemailer";
 import {
   otpTemplate,
   welcomeTemplate,
-  passwordChangedTemplate
+  passwordChangedTemplate,
 } from "./emailTemplate.js";
 
 const createTransporter = () => {
@@ -51,7 +51,7 @@ export const sendWelcomeEmail = async (to: string, name: string) => {
 export const sendPasswordChangeNotification = async (
   to: string,
   name: string,
-  time: string,
+  time: string
 ) => {
   return sendMail(
     to,

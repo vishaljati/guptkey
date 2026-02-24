@@ -2,10 +2,16 @@ import { Schema, model, type Model } from "mongoose";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { type IUser, type IUserMethods } from "../types/userModel.types.js";
-import { type AccessTokenPayload, type RefreshTokenPayload } from "../types/jwt.types.js";
+import {
+  type AccessTokenPayload,
+  type RefreshTokenPayload,
+} from "../types/jwt.types.js";
 
-
-const userSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>, IUserMethods>(
+const userSchema = new Schema<
+  IUser,
+  Model<IUser, {}, IUserMethods>,
+  IUserMethods
+>(
   {
     name: {
       type: String,
@@ -27,7 +33,7 @@ const userSchema = new Schema<IUser, Model<IUser, {}, IUserMethods>, IUserMethod
       default: false,
     },
     refreshToken: {
-      type: String
+      type: String,
     },
   },
   {
@@ -42,11 +48,9 @@ userSchema.pre("save", async function () {
   this.password = await bcrypt.hash(this.password, SALT_ROUNDS);
 });
 
-userSchema.methods.isPasswordCorrect = async function (
-  password: string
-) {
+userSchema.methods.isPasswordCorrect = async function (password: string) {
   if (!password) {
-    throw new Error("PASSWORD IS REQUIRED IN BCRYPT")
+    throw new Error("PASSWORD IS REQUIRED IN BCRYPT");
   }
   return await bcrypt.compare(password, this.password);
 };
@@ -57,7 +61,6 @@ userSchema.methods.generateAccessToken = function (): string {
       _id: this._id,
       name: this.name,
       email: this.email,
-
     } as AccessTokenPayload,
     process.env.ACCESS_TOKEN_SECRET as string,
     {
@@ -71,7 +74,6 @@ userSchema.methods.generateRefreshToken = function (): string {
     {
       _id: this._id,
       email: this.email,
-
     } as RefreshTokenPayload,
     process.env.REFRESH_TOKEN_SECRET as string,
     {
@@ -80,5 +82,7 @@ userSchema.methods.generateRefreshToken = function (): string {
   );
 };
 
-
-export const User = model<IUser, Model<IUser, {}, IUserMethods>>("User", userSchema);
+export const User = model<IUser, Model<IUser, {}, IUserMethods>>(
+  "User",
+  userSchema
+);

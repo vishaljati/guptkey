@@ -9,11 +9,9 @@ export interface IUser {
   refreshToken?: string;
   createdAt: Date;
   updatedAt: Date;
-
 }
 export interface IUserMethods {
   isPasswordCorrect(password: string): Promise<boolean>;
   generateAccessToken(): string;
   generateRefreshToken(): string;
-
 }

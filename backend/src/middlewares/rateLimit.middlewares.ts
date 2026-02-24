@@ -1,7 +1,6 @@
 import rateLimit from "express-rate-limit";
 import { type Request, type Response } from "express";
 
-
 export const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
 
@@ -23,7 +22,6 @@ export const apiLimiter = rateLimit({
     });
   },
 });
-
 
 export const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min

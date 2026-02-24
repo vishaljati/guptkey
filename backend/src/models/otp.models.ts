@@ -27,7 +27,4 @@ const otpSchema = new Schema<otpModel>(
 // Auto delete after expiry
 otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-export const Otp = mongoose.model<otpModel>(
-  "Otp",
-  otpSchema
-);
+export const Otp = mongoose.model<otpModel>("Otp", otpSchema);

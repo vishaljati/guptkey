@@ -1,6 +1,4 @@
-
 export const welcomeTemplate = (name: string) => {
-
   return `
   <!DOCTYPE html>
   <html>
@@ -107,10 +105,7 @@ export const welcomeTemplate = (name: string) => {
   `;
 };
 
-export const otpTemplate = (
-  rawOtp: string,
-  expiryMinutes: number = 10
-) => {
+export const otpTemplate = (rawOtp: string, expiryMinutes: number = 10) => {
   const otp = rawOtp.trim();
 
   return `
@@ -200,10 +195,7 @@ export const otpTemplate = (
   </html>
   `;
 };
-export const passwordChangedTemplate = (
-  name: string,
-  time: string,
-) => {
+export const passwordChangedTemplate = (name: string, time: string) => {
   return `
   <!DOCTYPE html>
   <html>
