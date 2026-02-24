@@ -29,19 +29,20 @@ const SettingsPage = () => {
   const [otp, setOtp] = useState("");
   const [step, setStep] = useState<1 | 2>(1);
   const [deletionStep, setDeletionStep] = useState<"idle" | "otp-sent">("idle");
-  const [loading, setLoading] = useState(false);
+  const [loadingforPassChange, setLoadingforPassChange] = useState(false);
+  const [loadingforAccDel, setloadingforAccDel] = useState(false);
   const navigate = useNavigate()
   const dispatch = useDispatch()
   const { keyRef } = useVaultContext();
   const [timeout, setTimeoutVal] = useState(
-    localStorage.getItem("sessionTimeout") || "15"
+    localStorage.getItem("sessionTimeout") || "5"
   );
 
   const vault = useSelector((state: RootState) => state.vault.vault);
   //Password Change
   const handleRequestOtpforPasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setLoadingforPassChange(true);
 
     try {
       await requestPasswordResetApi(oldPassword)
@@ -70,12 +71,12 @@ const SettingsPage = () => {
       });
 
     } finally {
-      setLoading(false);
+      setLoadingforPassChange(false);
     }
   };
   const handleConfirmChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
+    setLoadingforPassChange(true);
 
     try {
 
@@ -117,13 +118,13 @@ const SettingsPage = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setLoadingforPassChange(false);
     }
   };
   //Account Deletion
   const handleRequestOtpforAccountDeletion = async () => {
     try {
-      setLoading(true);
+      setloadingforAccDel(true);
       await requestOtpForDeleteAccountApi()
       toast({
         title: "OTP Sent",
@@ -147,7 +148,7 @@ const SettingsPage = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setloadingforAccDel(false);
     }
   };
   const handleConfirmDelete = async () => {
@@ -162,7 +163,7 @@ const SettingsPage = () => {
     }
 
     try {
-      setLoading(true);
+      setloadingforAccDel(true);
       await confirmDeleteAccountApi(otp)
       toast({
         title: "Account Deleted Successfully",
@@ -191,11 +192,11 @@ const SettingsPage = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setloadingforAccDel(false);
     }
   };
   const cancelDeleting = async () => {
-    setLoading(true)
+    setloadingforAccDel(true)
     try {
       await cancelAccountDeletionApi()
       setDeletionStep("idle")
@@ -220,7 +221,7 @@ const SettingsPage = () => {
         variant: "destructive",
       });
     } finally {
-      setLoading(false)
+      setloadingforAccDel(false)
     }
 
   }
@@ -264,10 +265,10 @@ const SettingsPage = () => {
                 />
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loadingforPassChange}
                   className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition-all duration-200"
                 >
-                  {loading ? "Verifying..." : "Request OTP"}
+                  {loadingforPassChange ? "Verifying..." : "Request OTP"}
                 </button>
               </form>)}
             {step === 2 &&
@@ -288,10 +289,10 @@ const SettingsPage = () => {
                 />
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loadingforPassChange}
                   className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition-all duration-200"
                 >
-                  {loading ? "Updating..." : "Confirm & Change Password"}
+                  {loadingforPassChange ? "Updating..." : "Confirm & Change Password"}
                 </button>
               </form>)}
 
@@ -310,7 +311,8 @@ const SettingsPage = () => {
                 className="px-3 py-2.5 bg-secondary/50 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition-all"
                 title="Select session timeout duration"
               >
-                <option value="1">1 minutes</option>
+                <option value="2">2 minutes</option>
+                <option value="5">5 minutes</option>
                 <option value="15">15 minutes</option>
                 <option value="30">30 minutes</option>
                 <option value="60">1 hour</option>
@@ -346,17 +348,17 @@ const SettingsPage = () => {
                 />
                 <button
                   type="submit"
-                  disabled={loading}
+                  disabled={loadingforAccDel}
                   className="px-5 py-2.5 bg-destructive/10 text-destructive text-sm font-semibold rounded-lg hover:bg-destructive/20 transition-all duration-200 border border-destructive/20"
                 >
-                  {loading ? "Deleting All data..." : "Confirm Delete"}
+                  {loadingforAccDel ? "Deleting All data..." : "Confirm Delete"}
                 </button>
                 <button
-                  disabled={loading}
+                  disabled={loadingforAccDel}
                   onClick={cancelDeleting}
                   className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition-all duration-200"
                 >
-                  {loading ? "Cancelling..." : "Cancel"}
+                  {loadingforAccDel ? "Cancelling..." : "Cancel"}
                 </button>
               </form>
             )}
