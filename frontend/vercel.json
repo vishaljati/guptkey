@@ -1,8 +1,8 @@
 {
-  "rewrites": [
+  "routes": [
     {
-      "source": "/api/(.*)",
-      "destination": "https://guptkey.onrender.com/api/$1"
+      "src": "/api/(.*)",
+      "dest": "https://guptkey.onrender.com/api/$1"
     }
   ]
 }
