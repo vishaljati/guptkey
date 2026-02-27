@@ -5,14 +5,25 @@ import {
   passwordChangedTemplate,
 } from "./emailTemplate.js";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resendInstance = () => {
+  const { RESEND_API_KEY } = process.env;
+
+  if (!RESEND_API_KEY) {
+    throw new Error("RESEND_API_KEY is not defined in environment variables");
+  }
+  const resend = new Resend(RESEND_API_KEY);
+
+  return resend;
+}
+
+
 
 export const sendEmail = async (
   to: string,
   subject: string,
   html: string
 ) => {
-  return await resend.emails.send({
+  return await resendInstance().emails.send({
     from: "GuptKey <noreply@guptkey.work.gd>",
     to,
     subject,
