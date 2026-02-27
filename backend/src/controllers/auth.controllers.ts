@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
 import { type RefreshTokenPayload } from "../types/jwt.types.js";
 import { EncryptedPassword } from "../models/vault.model.js";
-import { cookieOption } from "../utils/index.js"
+
 
 const generateAccessAndRefreshTokens = async (userId: Types.ObjectId) => {
   try {
@@ -117,6 +117,11 @@ const loginUser = AsyncHandler(async (req: Request, res: Response) => {
   const loggedInUser = await User.findById(userId).select(
     "-password -refreshToken"
   );
+  const cookieOption = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none" as const,
+  };
 
 
   const responseData = {
@@ -147,6 +152,11 @@ const logoutUser = AsyncHandler(async (req: Request, res: Response) => {
     }
   );
 
+  const cookieOption = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none" as const,
+  };
 
   return res
     .status(200)
@@ -191,6 +201,11 @@ const refreshAccessToken = AsyncHandler(async (req: Request, res: Response) => {
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
     user._id
   );
+  const cookieOption = {
+    httpOnly: true,
+    secure: true,
+    sameSite: "none" as const,
+  };
 
   return res
     .status(200)
