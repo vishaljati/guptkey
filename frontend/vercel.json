@@ -3,10 +3,6 @@
     {
       "src": "/api/(.*)",
       "dest": "https://guptkey.onrender.com/api/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
     }
   ]
 }
