@@ -11,15 +11,15 @@ const app: Application = express();
 
 app.use(
   cors({
-    origin:"https://guptkey.vercel.app",
+    origin: process.env.REACT_CLIENT_URL || "https://guptkey.vercel.app",
     credentials: true,
   })
 );
-app.use(cookieParser());
-app.use(express.json({ limit: "16kb" }));
-app.use(express.urlencoded({ extended: true }));
-app.use(express.static("public"));
 app.use(apiLimiter);
+app.use(cookieParser());
+app.use(express.json({ limit: "32kb" }));
+app.use(express.urlencoded({ extended: true }));
+
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
     success: true,
