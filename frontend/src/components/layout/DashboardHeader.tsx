@@ -6,6 +6,7 @@ import {
   Settings,
   LogOut,
   Loader2,
+  Menu,
 } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store/store";
@@ -21,12 +22,14 @@ interface DashboardHeaderProps {
   onSearch: (query: string) => void;
   onAddNew: () => void;
   rightElement?: React.ReactNode;
+  onMenuClick?: () => void; // optional mobile sidebar trigger
 }
 
 const DashboardHeader = ({
   onSearch,
   onAddNew,
   rightElement,
+  onMenuClick,
 }: DashboardHeaderProps) => {
   const [searchValue, setSearchValue] = useState("");
   const [open, setOpen] = useState(false);
@@ -45,30 +48,31 @@ const DashboardHeader = ({
     onSearch(val);
   };
 
-  const handelLogout = async () => {
+  const handleLogout = async () => {
     try {
       setLoading(true);
       await LogoutUser();
+
       keyRef.current = null;
       dispatch(logout(null));
       dispatch(clearVault());
       navigate("/login");
+
       toast({
-        title: "Logged out Successfully",
+        title: "Logged out successfully",
         description: "Your vault has been locked.",
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       if (isAxiosError(error)) {
-        const message =
-          error.response?.data?.message || "Something went wrong";
         toast({
-          title: "Logout Failed",
-          description: message,
+          title: "Logout failed",
+          description:
+            error.response?.data?.message || "Something went wrong",
           variant: "destructive",
         });
       } else {
         toast({
-          title: "Logout Failed",
+          title: "Logout failed",
           description: "Unexpected error occurred. Try again later.",
           variant: "destructive",
         });
@@ -94,41 +98,55 @@ const DashboardHeader = ({
   }, []);
 
   return (
-    <header className="border-b border-border bg-card/70 backdrop-blur-md sticky top-0 z-30">
+    <header className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur-md shadow-sm">
 
-      {/* Top Row */}
+      {/* ===== Top Row ===== */}
       <div className="h-16 px-4 md:px-6 flex items-center justify-between">
 
-        {/* Logo */}
-        <div className="font-semibold text-lg tracking-wide text-foreground max-w-[140px] truncate">
-          GuptKey
+        {/* Left Section (Menu + Logo) */}
+        <div className="flex items-center gap-3 min-w-0">
+
+          {/* Mobile Menu Button */}
+          <button
+            onClick={onMenuClick}
+            className="md:hidden p-2 rounded-lg hover:bg-secondary/50 transition"
+            aria-label="Open menu"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          {/* Logo */}
+          <div className="text-lg font-semibold tracking-wide text-foreground whitespace-nowrap">
+            GuptKey
+          </div>
+
         </div>
 
         {/* Right Section */}
         <div className="flex items-center gap-3">
 
-          {/* Desktop Save */}
+          {/* Desktop Save Slot */}
           {rightElement && (
             <div className="hidden md:block">
               {rightElement}
             </div>
           )}
 
-          {/* Desktop Add */}
+          {/* Desktop Add Button */}
           <button
             onClick={onAddNew}
-            className="hidden md:flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition-all duration-200"
+            className="hidden md:flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90 transition"
           >
             <Plus className="w-4 h-4" />
             Add Password
           </button>
 
-          {/* User Avatar */}
+          {/* Avatar */}
           <div className="relative" ref={dropdownRef}>
             <button
-              title="open"
               onClick={() => setOpen(!open)}
-              className="flex items-center gap-2 p-2 rounded-lg hover:bg-secondary/50 transition-all duration-200"
+              className="flex items-center p-2 rounded-lg hover:bg-secondary/50 transition"
+              aria-label="User menu"
             >
               <div className="w-9 h-9 rounded-full bg-secondary flex items-center justify-center border border-border">
                 <User className="w-4 h-4 text-muted-foreground" />
@@ -136,37 +154,41 @@ const DashboardHeader = ({
             </button>
 
             {open && (
-              <div className="absolute right-0 mt-3 w-64 bg-card border border-border rounded-xl shadow-xl p-4 z-50">
+              <div className="absolute right-0 mt-3 w-64 bg-card border border-border rounded-xl shadow-xl p-4 z-50 animate-in fade-in zoom-in-95">
+
+                {/* User Info */}
                 <div className="mb-3">
                   <p className="text-sm font-semibold text-foreground">
                     {name}
                   </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-muted-foreground truncate">
                     {email}
                   </p>
                 </div>
 
                 <div className="border-t border-border my-2" />
 
+                {/* Settings */}
                 <button
                   onClick={() => {
                     setOpen(false);
                     navigate("/settings");
                   }}
-                  className="flex items-center gap-2 w-full px-2 py-2 text-sm text-foreground hover:bg-secondary/50 rounded-lg transition-all"
+                  className="flex items-center gap-2 w-full px-2 py-2 text-sm hover:bg-secondary/50 rounded-lg transition"
                 >
                   <Settings className="w-4 h-4 text-muted-foreground" />
                   Settings
                 </button>
 
+                {/* Logout */}
                 {loading ? (
                   <div className="flex justify-center py-3">
                     <Loader2 className="w-5 h-5 animate-spin" />
                   </div>
                 ) : (
                   <button
-                    onClick={handelLogout}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-destructive/80 hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
+                    onClick={handleLogout}
+                    className="flex items-center gap-3 w-full px-2 py-2 mt-1 rounded-lg text-sm font-medium text-destructive/80 hover:bg-destructive/10 hover:text-destructive transition"
                   >
                     <LogOut className="w-4 h-4" />
                     Logout
@@ -175,10 +197,11 @@ const DashboardHeader = ({
               </div>
             )}
           </div>
+
         </div>
       </div>
 
-      {/* Mobile Search */}
+      {/* ===== Mobile Search ===== */}
       <div className="md:hidden px-4 pb-3">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -187,25 +210,25 @@ const DashboardHeader = ({
             placeholder="Search passwords..."
             value={searchValue}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-secondary/50 border border-border rounded-lg text-sm"
+            className="w-full pl-10 pr-4 py-2 bg-secondary/50 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
       </div>
 
-      {/* Mobile Action Buttons */}
+      {/* ===== Mobile Action Buttons ===== */}
       <div className="md:hidden px-4 pb-4 grid grid-cols-2 gap-3">
         {rightElement}
 
         <button
           onClick={onAddNew}
-          className="flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-medium"
+          className="flex items-center justify-center gap-2 px-4 py-3 bg-primary text-primary-foreground rounded-xl text-sm font-medium hover:bg-primary/90 transition"
         >
           <Plus className="w-4 h-4" />
           Add
         </button>
       </div>
 
-      {/* Desktop Search */}
+      {/* ===== Desktop Search ===== */}
       <div className="hidden md:block px-6 pb-4">
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -214,7 +237,7 @@ const DashboardHeader = ({
             placeholder="Search passwords..."
             value={searchValue}
             onChange={(e) => handleSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-secondary/50 border border-border rounded-lg text-sm"
+            className="w-full pl-10 pr-4 py-2 bg-secondary/50 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
         </div>
       </div>
