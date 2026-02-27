@@ -81,7 +81,8 @@ api.interceptors.response.use(
         processQueue(refreshError);
 
         // Refresh failed → force logout
-        window.location.href = "/login";
+        // window.location.href = "/login";
+        console.error("Refresh failed:", refreshError);
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
@@ -98,10 +99,10 @@ api.interceptors.response.use(
     // --------------------------------
     // 🔒 Refresh Token Expired
     // --------------------------------
-    if (status === 403) {
-      window.location.href = "/login";
-      return Promise.reject(error);
-    }
+    // if (status === 403) {
+    //   window.location.href = "/login";
+    //   return Promise.reject(error);
+    // }
 
     return Promise.reject(error);
   }

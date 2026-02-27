@@ -9,9 +9,19 @@ import { apiLimiter } from "./middlewares/rateLimit.middlewares.js";
 import { errorHandler } from "./middlewares/error.middlewares.js";
 const app: Application = express();
 
+const allowedOrigins = [
+  "https://guptkey.vercel.app",
+];
+
 app.use(
   cors({
-    origin: process.env.REACT_CLIENT_URL || "https://guptkey.vercel.app",
+    origin: function (origin, callback) {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error("Not allowed by CORS"));
+    },
     credentials: true,
   })
 );
