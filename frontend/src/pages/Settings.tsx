@@ -34,6 +34,7 @@ const SettingsPage = () => {
   const [deletionStep, setDeletionStep] = useState<"idle" | "otp-sent">("idle");
   const [loadingforPassChange, setLoadingforPassChange] = useState(false);
   const [loadingforAccDel, setloadingforAccDel] = useState(false);
+  const [loadingforAccDelCancel, setLoadingforAccDelCancel] = useState(false);
 
   const NameOfUser = useSelector((state: RootState) => state.auth.name);
   const EmailOfUser = useSelector((state: RootState) => state.auth.email);
@@ -204,7 +205,7 @@ const SettingsPage = () => {
     }
   };
   const cancelDeleting = async () => {
-    setloadingforAccDel(true)
+    setLoadingforAccDelCancel(true)
     try {
       await cancelAccountDeletionApi()
       setDeletionStep("idle")
@@ -229,7 +230,7 @@ const SettingsPage = () => {
         variant: "destructive",
       });
     } finally {
-      setloadingforAccDel(false)
+      setLoadingforAccDelCancel(false)
     }
 
   }
@@ -316,7 +317,7 @@ const SettingsPage = () => {
                 <input
                   title="email"
                   type="email"
-                  value={EmailOfUser||""}
+                  value={EmailOfUser || ""}
                   disabled
                   className="w-full mt-1 px-3 py-2.5 bg-secondary/30 border border-border rounded-lg text-sm text-muted-foreground cursor-not-allowed"
                 />
@@ -437,11 +438,11 @@ const SettingsPage = () => {
                   {loadingforAccDel ? "Deleting All data..." : "Confirm Delete"}
                 </button>
                 <button
-                  disabled={loadingforAccDel}
+                  disabled={loadingforAccDelCancel}
                   onClick={cancelDeleting}
                   className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-semibold rounded-lg hover:bg-primary/90 transition-all duration-200"
                 >
-                  {loadingforAccDel ? "Cancelling..." : "Cancel"}
+                  {loadingforAccDelCancel ? "Cancelling..." : "Cancel"}
                 </button>
               </form>
             )}
