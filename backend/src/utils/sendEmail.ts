@@ -1,51 +1,31 @@
-import nodemailer, { SentMessageInfo } from "nodemailer";
+import { Resend } from "resend";
 import {
   otpTemplate,
   welcomeTemplate,
   passwordChangedTemplate,
 } from "./emailTemplate.js";
 
-const createTransporter = () => {
-  const { EMAIL_USER, EMAIL_PASS } = process.env;
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-  if (!EMAIL_USER || !EMAIL_PASS) {
-    throw new Error("Email credentials not loaded from environment");
-  }
-
-  return nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: {
-      user: EMAIL_USER,
-      pass: EMAIL_PASS,
-    },
-  });
-};
-
-export const sendMail = async (
+export const sendEmail = async (
   to: string,
   subject: string,
-  html: string,
-  text?: string
-): Promise<SentMessageInfo> => {
-  const transporter = createTransporter();
-
-  return transporter.sendMail({
-    from: `"GuptKey" <${process.env.EMAIL_USER}>`,
+  html: string
+) => {
+  return await resend.emails.send({
+    from: "GuptKey <noreply@guptkey.work.gd>",
     to,
     subject,
-    text,
     html,
   });
 };
 
 export const sendOTPEmail = async (to: string, otp: string) => {
-  return sendMail(to, "Your GuptKey Verification Code", otpTemplate(otp));
+  return sendEmail(to, "Your GuptKey Verification Code", otpTemplate(otp));
 };
 
 export const sendWelcomeEmail = async (to: string, name: string) => {
-  return sendMail(to, "Welcome to GuptKey!", welcomeTemplate(name));
+  return sendEmail(to, "Welcome to GuptKey!", welcomeTemplate(name));
 };
 
 export const sendPasswordChangeNotification = async (
@@ -53,7 +33,7 @@ export const sendPasswordChangeNotification = async (
   name: string,
   time: string
 ) => {
-  return sendMail(
+  return sendEmail(
     to,
     "Your GuptKey Password Was Changed",
     passwordChangedTemplate(name, time)

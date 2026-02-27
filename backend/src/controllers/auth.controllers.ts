@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
 import { type RefreshTokenPayload } from "../types/jwt.types.js";
 import { EncryptedPassword } from "../models/vault.model.js";
-
+import { sendWelcomeEmail } from "../utils/sendEmail.js";
 
 const generateAccessAndRefreshTokens = async (userId: Types.ObjectId) => {
   try {
@@ -75,6 +75,14 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
   if (!createdEncryptedPasswordVault) {
     throw new ApiError(500, "Encrypted password vault creation failed in DB");
   }
+
+  try {
+    await sendWelcomeEmail(createdUser.email, createdUser.name);
+
+  } catch (error) {
+    throw new ApiError(500, "Failed to send welcome email");
+  }
+
 
   return res
     .status(201)

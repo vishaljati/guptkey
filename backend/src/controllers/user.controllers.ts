@@ -52,6 +52,7 @@ const requestPasswordReset = AsyncHandler(
     return res.status(200).json(new ApiResponse(200, "OTP sent to your email"));
   }
 );
+
 const changePasswordWithOtp = AsyncHandler(
   async (req: Request, res: Response) => {
     const { otp, newPassword, encryptedData, iv, salt } = req.body;
@@ -112,8 +113,13 @@ const changePasswordWithOtp = AsyncHandler(
         $unset: { refreshToken: 1 },
       }
     );
-
     await resetToken.deleteOne();
+
+    try {
+      await sendPasswordChangeNotification(user.email, user.name, new Date().toLocaleString());
+    } catch (error) {
+      throw new ApiError(500, "Failed to send password change notification email");
+    }
     const cookieOption = {
       httpOnly: true,
       secure: true,
