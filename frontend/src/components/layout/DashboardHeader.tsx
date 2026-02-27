@@ -100,7 +100,7 @@ const DashboardHeader = ({
       <div className="h-16 px-4 md:px-6 flex items-center justify-between">
 
         {/* Logo */}
-        <div className="font-semibold text-lg tracking-wide text-foreground">
+        <div className="font-semibold text-lg tracking-wide text-foreground max-w-[140px] truncate">
           GuptKey
         </div>
 
