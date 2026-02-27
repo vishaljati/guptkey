@@ -76,13 +76,7 @@ const registerUser = AsyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(500, "Encrypted password vault creation failed in DB");
   }
 
-  try {
-    await sendWelcomeEmail(createdUser.email, createdUser.name);
-
-  } catch (error) {
-    throw new ApiError(500, "Failed to send welcome email");
-  }
-
+  await sendWelcomeEmail(createdUser.email, createdUser.name);
 
   return res
     .status(201)
