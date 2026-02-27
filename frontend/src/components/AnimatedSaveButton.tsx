@@ -26,7 +26,7 @@ export const AnimatedSaveButton = ({ onSave }: SaveButtonProps) => {
     <motion.button
       onClick={handlePress}
       disabled={status !== "idle"} // Disable interaction during both loading and success
-      className="relative overflow-hidden group w-full sm:w-auto min-w-[160px] flex justify-center items-center gap-2 px-6 py-3 sm:py-2.5 rounded-xl font-medium text-base sm:text-sm text-white border border-white/10 transition-all outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-900"
+      className="relative overflow-hidden group w-full md:w-auto flex justify-center items-center gap-2 px-5 py-3 md:py-2.5 rounded-xl font-medium text-base md:text-sm text-white border border-white/10 transition-all outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-900"
       initial={false}
       animate={{
         // Deep slate for idle, rich emerald for success
