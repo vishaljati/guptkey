@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
 import { type RefreshTokenPayload } from "../types/jwt.types.js";
 import { EncryptedPassword } from "../models/vault.model.js";
-
+import { cookieOption } from "../utils/index.js"
 
 const generateAccessAndRefreshTokens = async (userId: Types.ObjectId) => {
   try {
@@ -118,11 +118,6 @@ const loginUser = AsyncHandler(async (req: Request, res: Response) => {
     "-password -refreshToken"
   );
 
-  const cookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none" as const,
-  };
 
   const responseData = {
     Name: loggedInUser?.name,
@@ -134,8 +129,8 @@ const loginUser = AsyncHandler(async (req: Request, res: Response) => {
 
   return res
     .status(200)
-    .cookie("accessToken", accessToken, cookieOptions)
-    .cookie("refreshToken", refreshToken, cookieOptions)
+    .cookie("accessToken", accessToken, cookieOption)
+    .cookie("refreshToken", refreshToken, cookieOption)
     .json(new ApiResponse(200, "User logged in successfully", responseData));
 });
 
@@ -151,16 +146,12 @@ const logoutUser = AsyncHandler(async (req: Request, res: Response) => {
       new: true,
     }
   );
-  const cookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none" as const,
-  };
+
 
   return res
     .status(200)
-    .clearCookie("accessToken", cookieOptions)
-    .clearCookie("refreshToken", cookieOptions)
+    .clearCookie("accessToken", cookieOption)
+    .clearCookie("refreshToken", cookieOption)
     .json(new ApiResponse(200, "User Logged out"));
 });
 
@@ -196,11 +187,6 @@ const refreshAccessToken = AsyncHandler(async (req: Request, res: Response) => {
     throw new ApiError(401, "Refresh token is expired or used");
   }
 
-  const cookieOptions = {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none" as const,
-  };
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
     user._id
@@ -208,13 +194,10 @@ const refreshAccessToken = AsyncHandler(async (req: Request, res: Response) => {
 
   return res
     .status(200)
-    .cookie("accessToken", accessToken, cookieOptions)
-    .cookie("refreshToken", refreshToken, cookieOptions)
+    .cookie("accessToken", accessToken, cookieOption)
+    .cookie("refreshToken", refreshToken, cookieOption)
     .json(
-      new ApiResponse(200, "Access Token Refreshed Successfully", {
-        accessToken: accessToken,
-        refreshToken: refreshToken,
-      })
+      new ApiResponse(200, "Access Token Refreshed Successfully")
     );
 });
 

@@ -13,6 +13,7 @@ import {
   sendPasswordChangeNotification,
 } from "../utils/sendEmail.js";
 import { EncryptedPassword } from "../models/vault.model.js";
+import { cookieOption } from "../utils/index.js"
 
 const requestPasswordReset = AsyncHandler(
   async (req: Request, res: Response) => {
@@ -113,16 +114,11 @@ const changePasswordWithOtp = AsyncHandler(
     );
 
     await resetToken.deleteOne();
-    const cookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none" as const,
-    };
 
     return res
       .status(200)
-      .clearCookie("accessToken", cookieOptions)
-      .clearCookie("refreshToken", cookieOptions)
+      .clearCookie("accessToken", cookieOption)
+      .clearCookie("refreshToken", cookieOption)
       .json(new ApiResponse(200, "Password changed successfully"));
   }
 );
@@ -196,15 +192,11 @@ const confirmDeleteAccount = AsyncHandler(
     await EncryptedPassword.deleteOne({ userId });
     await User.deleteOne({ _id: userId });
     await resetToken.deleteOne();
-    const cookieOptions = {
-      httpOnly: true,
-      secure: true,
-      sameSite: "none" as const,
-    };
+
     return res
       .status(200)
-      .clearCookie("accessToken", cookieOptions)
-      .clearCookie("refreshToken", cookieOptions)
+      .clearCookie("accessToken", cookieOption)
+      .clearCookie("refreshToken", cookieOption)
       .json(new ApiResponse(200, "Account deleted successfully"));
   }
 );

@@ -2,6 +2,7 @@ import { EncryptedPassword } from "../models/vault.model.js";
 import { ApiError, AsyncHandler, ApiResponse } from "../utils/index.js";
 import { type Request, type Response } from "express";
 import mongoose from "mongoose";
+import { cookieOption } from "../utils/index.js"
 
 const getSaltfromDB = AsyncHandler(async (req: Request, res: Response) => {
   const userId = req.user._id;
