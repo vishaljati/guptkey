@@ -2,70 +2,73 @@
 
 Zero-Knowledge, Client-Side Encrypted Password Manager built with a Security-First (Zero-Order) Architecture.
 
-GuptKey ensures that **the server never has access to user secrets — not even in plaintext.**
+GuptKey guarantees that the server never has access to user secrets — not even in plaintext.
 
 ---
 
 ## 🚀 Vision
 
-Most password managers encrypt data, but still retain architectural control over secrets.
+Most password managers encrypt stored data but still retain architectural authority over user secrets.
 
-GuptKey eliminates that trust requirement.
+GuptKey removes that trust requirement entirely.
 
-- Encryption happens **in the browser**
-- Keys are derived **locally using Argon2id**
-- The backend stores **ciphertext only**
-- The server cannot decrypt vault data — by design
+- Encryption happens **inside the browser**
+- Keys are derived locally using **Argon2id**
+- Backend stores **ciphertext only**
+- Server is cryptographically incapable of decrypting vault data
 
-If the database is breached, attacker gets encrypted blobs — nothing usable.
+If the database is breached, attackers obtain encrypted blobs — not usable credentials.
 
 ---
 
-# 🏗 Architecture: Zero-Order Model
+# 🏗 Architecture: Zero-Order Security Model
 
-GuptKey follows a **Zero-Order Architecture** approach:
+GuptKey follows a **Zero-Order Architecture**:
 
-> Security primitives are defined before features.
+> Security primitives are defined before product features.
 
-Traditional apps:  
+Traditional approach:  
 Feature → Add security → Patch vulnerabilities  
 
-GuptKey:  
-Security → Define data model → Build API → Add UI  
+GuptKey approach:  
+Security → Define cryptographic boundaries → Build API → Add UI  
 
-No feature can bypass the encryption boundary.
+No feature can bypass the encryption layer.
 
 ---
 
 # 🔐 Cryptographic Model
 
-## Key Derivation
+## 🔑 Key Derivation (Client-Side)
 
 - Algorithm: **Argon2id**
-- Unique salt per user
-- Parameters configurable (memory, iterations, parallelism)
-- Key derived entirely on client
+- Unique cryptographic salt per user
+- Key derived entirely on the client
+- 256-bit output key
 
-Example parameter configuration:
+### Recommended Parameters
 
-- Memory Cost: 64MB – 128MB  
-- Time Cost: ≥ 3 iterations  
-- Parallelism: 1–4  
-- Output Length: 256-bit key  
+- Memory Cost: 64MB – 128MB
+- Time Cost: ≥ 3 iterations
+- Parallelism: 1–4
+- Output Length: 256 bits
 
-Derived key is never transmitted to backend.
+The derived key:
+- Is never transmitted
+- Is never logged
+- Is never stored server-side
 
 ---
 
-## Vault Encryption
+## 🔒 Vault Encryption
 
 - Algorithm: **AES-256-GCM**
 - 96-bit cryptographically secure random IV
 - IV generated using `crypto.getRandomValues()`
-- Authentication tag validated during decryption
+- Authentication tag validated on decryption
 - Each vault entry encrypted independently
 
-Encrypted structure:
+### Encrypted Vault Structure
 
 ```json
 {
@@ -75,7 +78,7 @@ Encrypted structure:
 }
 ```
 Backend stores only encrypted payload.
-
+---
 ## Authentication System
 ### Access Token
 -JWT (short-lived)
@@ -95,9 +98,11 @@ Backend stores only encrypted payload.
 -No localStorage token storage
 -CSRF resistant via SameSite + cookie policy
 
-##  Core Features
+---
 
-### User Authentication
+#  Core Features
+
+## User Authentication
 -User registration
 -Email verification (via Resend)
 -Secure login
@@ -105,7 +110,7 @@ Backend stores only encrypted payload.
 -Change password (OTP verification required)
 -Logout with refresh token invalidation
 
-### Vault Management
+## Vault Management
 All vault data is encrypted before transmission.
 
 Supported operations:
@@ -116,7 +121,7 @@ Supported operations:
 -Client-side decrypt & render
 
 Vault fields encrypted:
--Title
+-Site name
 -Username/Email
 -Password
 -Notes
@@ -124,7 +129,7 @@ Vault fields encrypted:
 
 Backend never sees plaintext.
 
-### 📧 Email System
+## 📧 Email System
 
 Provider: Resend
 
@@ -139,7 +144,7 @@ Security controls:
 -OTP rate limiting
 -OTP hashed in database (never stored plaintext)
 
-### 🛡 Security Controls
+## 🛡 Security Controls
 
 -Rate limiting on authentication endpoints
 -Brute-force protection
@@ -150,7 +155,9 @@ Security controls:
 -No sensitive logs
 -Strict HTTP security headers
 
-### 🧠 Threat Model
+---
+
+## 🧠 Threat Model
 
 | Threat               | Mitigation                         |
 |----------------------|------------------------------------|
@@ -162,32 +169,7 @@ Security controls:
 | XSS token theft      | No localStorage tokens             |
 | CSRF                 | SameSite strict policy             |
 
-## 📂 Project Structure
-frontend/src/
-├── config/
-├── crypto/
-├── components/
-├── features/
-├── store/
-├── hooks/
-├── lib/
-├── pages/
-├── service/
-├── types/
-├── utils/
-├── App.tsx
-└── main.tsx
-
-backend/src/
-├── controllers/
-├── middleware/
-├── models/
-├── routes/
-├── db/
-├── utils/
-├── types/
-├── app.ts
-└── index.ts
+---
 
 # 🛠 Tech Stack
 
