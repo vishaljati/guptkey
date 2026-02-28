@@ -43,8 +43,6 @@ GuptKey guarantees that the server never has access to user secrets — not even
 
 ---
 
-# 🏗 Architecture Overview
-
 # 🏗 Zero-Knowledge Architecture
 
 ### Zero-Knowledge Flow
