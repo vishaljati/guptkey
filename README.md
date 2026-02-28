@@ -93,10 +93,10 @@ Backend stores only encrypted payload.
 - Device-aware session tracking supported
 
 ## Session Protection
--Token expiration enforcement
--Replay mitigation via rotation
--No localStorage token storage
--CSRF resistant via SameSite + cookie policy
+- Token expiration enforcement
+- Replay mitigation via rotation
+- No localStorage token storage
+- CSRF resistant via SameSite + cookie policy
 
 ---
 
