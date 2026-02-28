@@ -163,19 +163,19 @@ Security controls:
 | CSRF                 | SameSite strict policy             |
 
 ## 📂 Project Structure
-frontend/src
-└── config/
+frontend/src/
+├── config/
 ├── crypto/
 ├── components/
 ├── features/
 ├── store/
-└── hooks/
-└── lib/
-└── pages/
-└── service/
-└── types/
-└── utils/
-└── App.tsx
+├── hooks/
+├── lib/
+├── pages/
+├── service/
+├── types/
+├── utils/
+├── App.tsx
 └── main.tsx
 
 backend/src/
@@ -184,9 +184,9 @@ backend/src/
 ├── models/
 ├── routes/
 ├── db/
-└── utils/
-└── types/
-└── app.ts
+├── utils/
+├── types/
+├── app.ts
 └── index.ts
 
 # 🛠 Tech Stack
