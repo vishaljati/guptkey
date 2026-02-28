@@ -1,3 +1,40 @@
+<!-- ====================== PREMIUM BANNER ====================== -->
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0f2027,100:2c5364&height=230&section=header&text=GuptKey&fontSize=55&fontColor=ffffff&animation=fadeIn&fontAlignY=35&desc=Zero-Knowledge%20Password%20Manager&descAlignY=60&descAlign=50" />
+</p>
+
+<p align="center">
+  <b>🔐 Zero-Knowledge • Client-Side Encryption • Security-First Architecture</b>
+</p>
+
+---
+
+<!-- ====================== BADGES ====================== -->
+
+<p align="center">
+
+<img src="https://img.shields.io/badge/Architecture-Zero--Knowledge-blue?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Encryption-AES--256--GCM-success?style=for-the-badge" />
+<img src="https://img.shields.io/badge/KDF-Argon2id-orange?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Auth-JWT%20Rotation-critical?style=for-the-badge" />
+<img src="https://img.shields.io/badge/Security-First%20Design-red?style=for-the-badge" />
+<img src="https://img.shields.io/badge/License-MIT-lightgrey?style=for-the-badge" />
+
+</p>
+
+---
+
+<!-- ====================== TECH LOGOS ====================== -->
+
+## 🛠 Built With
+
+<p align="center">
+  <img src="https://skillicons.dev/icons?i=react,ts,nodejs,express,mongodb,redux" />
+</p>
+
+---
+
 # 🔐 GuptKey
 
 Zero-Knowledge, Client-Side Encrypted Password Manager built with a Security-First (Zero-Order) Architecture.
@@ -6,18 +43,22 @@ GuptKey guarantees that the server never has access to user secrets — not even
 
 ---
 
-## 🚀 Vision
+# 🏗 Architecture Overview
 
-Most password managers encrypt stored data but still retain architectural authority over user secrets.
+# 🏗 Zero-Knowledge Architecture
 
-GuptKey removes that trust requirement entirely.
+### Zero-Knowledge Flow
+User Master Password
+↓
+Argon2id Key Derivation (Client)
+↓
+AES-256-GCM Encryption
+↓
+Ciphertext Sent to Backend
+↓
+Database Stores Encrypted Blob Only
 
-- Encryption happens **inside the browser**
-- Keys are derived locally using **Argon2id**
-- Backend stores **ciphertext only**
-- Server is cryptographically incapable of decrypting vault data
-
-If the database is breached, attackers obtain encrypted blobs — not usable credentials.
+Server cannot decrypt vault data — by design.
 
 ---
 
