@@ -81,16 +81,16 @@ Backend stores only encrypted payload.
 ---
 ## Authentication System
 ### Access Token
--JWT (short-lived)
--Stored in HTTP-only cookies
--SameSite strict
--Not accessible to JavaScript
+- JWT (short-lived)
+- Stored in HTTP-only cookies
+- SameSite strict
+- Not accessible to JavaScript
 
 ### Refresh Token
--Rotated on every use
--Stored securely server-side
--Invalidated on logout
--Device-aware session tracking supported
+- Rotated on every use
+- Stored securely server-side
+- Invalidated on logout
+- Device-aware session tracking supported
 
 ## Session Protection
 -Token expiration enforcement
@@ -103,29 +103,29 @@ Backend stores only encrypted payload.
 #  Core Features
 
 ## User Authentication
--User registration
--Email verification (via Resend)
--Secure login
--Forgot password (OTP-based)
--Change password (OTP verification required)
--Logout with refresh token invalidation
+- User registration
+- Email verification (via Resend)
+- Secure login
+- Forgot password (OTP-based)
+- Change password (OTP verification required)
+- Logout with refresh token invalidation
 
 ## Vault Management
 All vault data is encrypted before transmission.
 
 Supported operations:
--Create vault item
--Update vault item
--Delete vault item
--Retrieve encrypted vault
--Client-side decrypt & render
+- Create vault item
+- Update vault item
+- Delete vault item
+- Retrieve encrypted vault
+- Client-side decrypt & render
 
 Vault fields encrypted:
--Site name
--Username/Email
--Password
--Notes
--isFavorite
+- Site name
+- Username/Email
+- Password
+- Notes
+- isFavorite
 
 Backend never sees plaintext.
 
@@ -134,26 +134,26 @@ Backend never sees plaintext.
 Provider: Resend
 
 Used for:
--Email verification
--OTP delivery
--Password reset confirmation
+- Email verification
+- OTP delivery
+- Password reset confirmation
 
 Security controls:
--OTP expiration
--OTP attempt limitation
--OTP rate limiting
--OTP hashed in database (never stored plaintext)
+- OTP expiration
+- OTP attempt limitation
+- OTP rate limiting
+- OTP hashed in database (never stored plaintext)
 
 ## 🛡 Security Controls
 
--Rate limiting on authentication endpoints
--Brute-force protection
--Input validation & sanitization
--MongoDB injection prevention
--Secure CORS configuration
--Environment variable isolation
--No sensitive logs
--Strict HTTP security headers
+- Rate limiting on authentication endpoints
+- Brute-force protection
+- Input validation & sanitization
+- MongoDB injection prevention
+- Secure CORS configuration
+- Environment variable isolation
+- No sensitive logs
+- Strict HTTP security headers
 
 ---
 
